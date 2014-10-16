@@ -21,7 +21,7 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 $scope.selected = 'None';
 $scope.items = [
     { name: 'John', otherProperty: 'Foo' },
-    { name: 'Joe', otherProperty: 'Boo' }
+    { name: 'Joe', otherProperty: 'Bar' }
 };
 
 $scope.menuOptions = [
