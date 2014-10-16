@@ -49,7 +49,7 @@ $scope.menuOptions = [
 ];
 ```
 
-## Limitions (work in progress)
+## Limitations (work in progress)
 
 Nested lists are not supported yet, because I have not needed it yet. If you add it please do a pull request.
 
