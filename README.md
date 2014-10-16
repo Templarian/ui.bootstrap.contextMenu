@@ -2,6 +2,8 @@
 
 AngularJS UI Bootstrap Module for adding context menus to elements.
 
+![Example](http://templarian.com/files/angularjs_contextmenu.png)
+
 ## Usage
 
 Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contextMenu` as a dependency module.
