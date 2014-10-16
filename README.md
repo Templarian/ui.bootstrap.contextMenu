@@ -19,7 +19,9 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 
 ```js
 $scope.items = [
-    { name 
+    { name: 'John', otherProperty: 'Foo' },
+    { name: 'Joe', otherProperty: 'Boo' }
+};
 
 $scope.menuOptions = [
     ['Select', function ($itemScope) {
@@ -27,7 +29,7 @@ $scope.menuOptions = [
     }],
     null, // Dividier
     ['Remove', function ($itemScope) {
-        window.location = '/api/download/icon/png/' + $itemScope.icon.id + '/36';
+        $scope.items.slice($itemScope.$index, 1);
     }]
 ];
 ```
