@@ -31,3 +31,25 @@ $scope.menuOptions = [
     }]
 ];
 ```
+
+## Menu Options
+
+Every menu option has an array with 2 indexs.
+
+## Limitions (work in progress)
+
+Nested lists are not supported yet, because I have not needed it yet. If you add it please do a pull request.
+
+```JS
+$scope.menuOptions = [
+    ['Parent Item 1', function ($itemScope) {
+        // Code
+    },  ['Child Item 1', function ($itemScope) {
+            // Code
+        }],
+        ['Child Item 2', function ($itemScope) {
+            // Code
+        }],
+    ]
+]
+```
