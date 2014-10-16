@@ -1,6 +1,6 @@
 #contextMenu
 
-A AngularJS UI Bootstrap Module for adding context menus to items.
+AngularJS UI Bootstrap Module for adding context menus to elements.
 
 ## Usage
 
@@ -34,7 +34,15 @@ $scope.menuOptions = [
 
 ## Menu Options
 
-Every menu option has an array with 2 indexs.
+Every menu option has an array with 2 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
+
+```js
+$scope.menuOptions = [
+    [function ($itemScope) { return $itemScope.name; }, function ($itemScope) {
+        // Code
+    }]
+];
+```
 
 ## Limitions (work in progress)
 
