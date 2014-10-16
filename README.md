@@ -62,5 +62,5 @@ $scope.menuOptions = [
             // Code
         }],
     ]
-]
+];
 ```
