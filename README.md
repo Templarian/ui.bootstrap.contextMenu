@@ -9,8 +9,8 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 ### View
 
 ```html
-<div ng-repeat="item in items">
-    <ANY context-menu="menuOptions">Right Click</ANY>
+<div>
+    <div ng-repeat="item in items" context-menu="menuOptions">Right Click: {{item.name}}</div>
 </div>
 <div ng-bind="selected"></div>
 ```
@@ -18,6 +18,7 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 ### Controller
 
 ```js
+$scope.selected = 'None';
 $scope.items = [
     { name: 'John', otherProperty: 'Foo' },
     { name: 'Joe', otherProperty: 'Boo' }
@@ -25,11 +26,11 @@ $scope.items = [
 
 $scope.menuOptions = [
     ['Select', function ($itemScope) {
-        $scope.selected = $itemScope.
+        $scope.selected = $itemScope.item.name;
     }],
     null, // Dividier
     ['Remove', function ($itemScope) {
-        $scope.items.slice($itemScope.$index, 1);
+        $scope.items.splice($itemScope.$index, 1);
     }]
 ];
 ```
