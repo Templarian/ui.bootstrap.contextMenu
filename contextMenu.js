@@ -1,4 +1,4 @@
-﻿angular.module('ui.bootstrap.contextMenu', [])
+angular.module('ui.bootstrap.contextMenu', [])
 
 .directive('contextMenu', function ($parse) {
     var renderContextMenu = function ($scope, event, options) {
@@ -26,6 +26,8 @@
                 $li.append($a);
                 $li.on('click', function () {
                     $scope.$apply(function () {
+                        $(event.currentTarget).removeClass('context');
+                        $contextMenu.remove();
                         item[1].call($scope, $scope);
                     });
                 });
@@ -42,9 +44,11 @@
             zIndex: 9999
         });
         $(document).find('body').append($contextMenu);
-        $contextMenu.on('mousedown', function (e) {
-            $(event.currentTarget).removeClass('context');
-            $contextMenu.remove();
+        $contextMenu.on("mousedown", function (e) {
+            if ($(e.target).hasClass('dropdown')) {
+                $(event.currentTarget).removeClass('context');
+                $contextMenu.remove();
+            }
         }).on('contextmenu', function (event) {
             $(event.currentTarget).removeClass('context');
             event.preventDefault();
