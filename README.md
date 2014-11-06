@@ -43,7 +43,7 @@ Every menu option has an array with 2 indexs. Most items will use the `[String, 
 
 ```js
 $scope.menuOptions = [
-    [function ($itemScope) { return $itemScope.name; }, function ($itemScope) {
+    [function ($itemScope) { return $itemScope.item.name; }, function ($itemScope) {
         // Code
     }]
 ];
@@ -62,7 +62,7 @@ $scope.menuOptions = [
         }],
         ['Child Item 2', function ($itemScope) {
             // Code
-        }],
+        }]
     ]
 ];
 ```
