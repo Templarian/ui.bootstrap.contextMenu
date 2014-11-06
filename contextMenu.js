@@ -42,7 +42,7 @@
             zIndex: 9999
         });
         $(document).find('body').append($contextMenu);
-        $contextMenu.on("click", function (e) {
+        $contextMenu.on('mousedown', function (e) {
             $(event.currentTarget).removeClass('context');
             $contextMenu.remove();
         }).on('contextmenu', function (event) {
