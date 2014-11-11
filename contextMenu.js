@@ -24,7 +24,8 @@ angular.module('ui.bootstrap.contextMenu', [])
                 $a.attr({ tabindex: '-1', href: '#' });
                 $a.text(typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope));
                 $li.append($a);
-                $li.on('click', function () {
+                $li.on('click', function ($event) {
+                    $event.preventDefault();
                     $scope.$apply(function () {
                         $(event.currentTarget).removeClass('context');
                         $contextMenu.remove();
