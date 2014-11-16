@@ -49,6 +49,16 @@ $scope.menuOptions = [
 ];
 ```
 
+## Style Overlay
+
+To give a light darker disabled tint while the menu is open add the style below.
+
+```css
+body > .dropdown {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+```
+
 ## Limitations (work in progress)
 
 Nested lists are not supported yet, because I have not needed it yet. If you add it please do a pull request.
