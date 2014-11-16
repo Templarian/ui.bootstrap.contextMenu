@@ -36,9 +36,14 @@ angular.module('ui.bootstrap.contextMenu', [])
             $ul.append($li);
         });
         $contextMenu.append($ul);
+        var height = Math.max(
+            document.body.scrollHeight, document.documentElement.scrollHeight,
+            document.body.offsetHeight, document.documentElement.offsetHeight,
+            document.body.clientHeight, document.documentElement.clientHeight
+        );
         $contextMenu.css({
             width: '100%',
-            height: '100%',
+            height: height + 'px',
             position: 'absolute',
             top: 0,
             left: 0,
