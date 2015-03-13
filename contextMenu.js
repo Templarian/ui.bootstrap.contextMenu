@@ -22,14 +22,14 @@ angular.module('ui.bootstrap.contextMenu', [])
             } else {
                 $a = $('<a>');
                 $a.attr({ tabindex: '-1', href: '#' });
-                $a.text(typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope));
+                $a.text(typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event));
                 $li.append($a);
                 $li.on('click', function ($event) {
                     $event.preventDefault();
                     $scope.$apply(function () {
                         $(event.currentTarget).removeClass('context');
                         $contextMenu.remove();
-                        item[1].call($scope, $scope);
+                        item[1].call($scope, $scope, event);
                     });
                 });
             }
