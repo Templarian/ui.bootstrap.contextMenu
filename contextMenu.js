@@ -20,7 +20,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             if (item === null) {
                 $li.addClass('divider');
             } else {
-                $a = $('<a>');
+                var $a = $('<a>');
                 $a.attr({ tabindex: '-1', href: '#' });
                 $a.text(typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event));
                 $li.append($a);
