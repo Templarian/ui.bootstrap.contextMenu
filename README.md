@@ -51,6 +51,23 @@ $scope.menuOptions = [
 ];
 ```
 
+The menuOptions can also be defined as a function returning an array. An empty array will not display a context menu.
+
+```html
+<div ng-repeat="item in items" context-menu="menuOptions(item)">Right Click: {{item.name}}</div>
+```
+
+```js
+$scope.menuOptions = function (item) {
+    if (item.name == 'John') { return []; }
+    return [
+        [function ($itemScope) { return $itemScope.item.name; }, function ($itemScope) {
+            // Code
+        }]
+    ];
+};
+```
+
 ## Style Overlay
 
 To give a light darker disabled tint while the menu is open add the style below.
