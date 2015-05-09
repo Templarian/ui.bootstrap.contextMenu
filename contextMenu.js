@@ -67,6 +67,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                 event.preventDefault();
                 var options = $scope.$eval(attrs.contextMenu);
                 if (options instanceof Array) {
+                    if (options.length === 0) { return; }
                     renderContextMenu($scope, event, options);
                 } else {
                     throw '"' + attrs.contextMenu + '" not an array';
