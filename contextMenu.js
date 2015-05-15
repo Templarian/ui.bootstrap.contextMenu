@@ -25,10 +25,8 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event);
                 $a.text(text);
                 $li.append($a);
-                var disabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, tag) : false;
-                if ( disabled ) {
-                    $li.addClass( 'disabled' );
-                } else {
+                var enabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, tag) : true;
+                if ( enabled ) {
                     $li.on( 'click', function( $event ) {
                         $event.preventDefault();
                         $scope.$apply( function() {
@@ -37,6 +35,8 @@ angular.module('ui.bootstrap.contextMenu', [])
                             item[1].call( $scope, $scope, event, tag );
                         } );
                     } );
+                } else {
+                    $li.addClass('disabled');
                 }
             }
             $ul.append($li);
