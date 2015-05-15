@@ -41,12 +41,16 @@ $scope.menuOptions = [
 
 ## Menu Options
 
-Every menu option has an array with 2 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
+Every menu option has an array with 2-3 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
+The third item is a function used to disable the item. If the functtion returns true, the item is disabled. If no function is provided, the item will be enabled by default. 
 
 ```js
 $scope.menuOptions = [
     [function ($itemScope) { return $itemScope.item.name; }, function ($itemScope) {
         // Code
+    }, function($itemScope, $event, text) {
+        // Disable code (text will be the return of the first function or String)
+        return true;//disabled
     }]
 ];
 ```
@@ -66,6 +70,27 @@ $scope.menuOptions = function (item) {
         }]
     ];
 };
+```
+
+## Tag option
+
+If you need another reference to the item (or your context is not inside a ngRepeat), there is a tag attribute you can use.
+
+```html
+<div context-menu="menuOptions" context-menu-tag="expression">Some item name here</div>
+```
+
+The tag is evaluated as an expression using ```$scope.$eval``` and passed to all 3 functions as the last argument:
+
+```js
+$scope.menuOptions = [
+    [function ($itemScope, $event, $tag) { return $itemScope.item.name; }, function ($itemScope, $event, $tag) {
+        // Code
+    }, function($itemScope, $event, text, $tag) {
+        // Disable code (text will be the return of the first function or String)
+        return true;//disabled
+    }]
+];
 ```
 
 ## Style Overlay
