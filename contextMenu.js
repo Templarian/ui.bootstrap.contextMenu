@@ -36,6 +36,9 @@ angular.module('ui.bootstrap.contextMenu', [])
                         } );
                     } );
                 } else {
+                    $li.on( 'click', function( $event ) {
+                        $event.preventDefault();
+                    });
                     $li.addClass('disabled');
                 }
             }
