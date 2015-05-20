@@ -1,10 +1,10 @@
 #contextMenu
 
-AngularJS UI Bootstrap Module for adding context menus to elements. [Demo](http://jsfiddle.net/gcayszpq/)
+AngularJS UI Bootstrap Module for adding context menus to elements. [Demo](http://codepen.io/templarian/pen/VLKZLB)
 
 `bower install angular-bootstrap-contextmenu`
 
-[![Example](http://templarian.com/files/angularjs_contextmenu.png)](http://jsfiddle.net/gcayszpq/)
+[![Example](http://templarian.com/files/angularjs_contextmenu.png)](http://codepen.io/templarian/pen/VLKZLB)
 
 ## Usage
 
@@ -42,15 +42,18 @@ $scope.menuOptions = [
 ## Menu Options
 
 Every menu option has an array with 2-3 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
-The third item is a function used to enable/disable the item. If the functtion returns true, the item is enabled (default). If no function is provided, the item will be enabled by default. 
+
+The third optional index is a function used to enable/disable the item. If the functtion returns true, the item is enabled (default). If no function is provided, the item will be enabled by default. 
 
 ```js
 $scope.menuOptions = [
-    [function ($itemScope) { return $itemScope.item.name; }, function ($itemScope) {
-        // Code
-    }, function($itemScope, $event, text) {
-        // Enable/disable code (text will be the return of the first function or String)
-        return true;//enabled
+    [function ($itemScope, $event) {
+        return $itemScope.item.name;
+    }, function ($itemScope, $event) {
+        // Action
+    }, function($itemScope, $event) {
+        // Enable or Disable
+        return true; // enabled = true, disabled = false
     }]
 ];
 ```
@@ -65,30 +68,34 @@ The menuOptions can also be defined as a function returning an array. An empty a
 $scope.menuOptions = function (item) {
     if (item.name == 'John') { return []; }
     return [
-        [function ($itemScope) { return $itemScope.item.name; }, function ($itemScope) {
-            // Code
+        [function ($itemScope) {
+            return $itemScope.item.name;
+        }, function ($itemScope) {
+            // Action
         }]
     ];
 };
 ```
 
-## Tag option
+## Model Attribute (optional)
 
-If you need another reference to the item (or your context is not inside a ngRepeat), there is a tag attribute you can use.
+In instances where a reference is not passed through the `$itemScope` (i.e. not using `ngRepeat`), there is a `model` attribute that can pass a value.
 
 ```html
-<div context-menu="menuOptions" context-menu-tag="expression">Some item name here</div>
+<div context-menu="menuOptions" model="expression">Some item name here</div>
 ```
 
-The tag is evaluated as an expression using ```$scope.$eval``` and passed to all 3 functions as the last argument:
+The `model` is evaluated as an expression using `$scope.$eval` and passed as the third argument.
 
 ```js
 $scope.menuOptions = [
-    [function ($itemScope, $event, $tag) { return $itemScope.item.name; }, function ($itemScope, $event, $tag) {
-        // Code
-    }, function($itemScope, $event, text, $tag) {
-        // Enable/disable code (text will be the return of the first function or String)
-        return true;//enabled
+    [function ($itemScope, $event, model) {
+        return $itemScope.item.name;
+    }, function ($itemScope, $event, model) {
+        // Action
+    }, function($itemScope, $event, model) {
+        // Enable or Disable
+        return true; // enabled = true, disabled = false
     }]
 ];
 ```
