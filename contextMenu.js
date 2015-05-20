@@ -1,7 +1,7 @@
 angular.module('ui.bootstrap.contextMenu', [])
 
 .directive('contextMenu', ["$parse", function ($parse) {
-    var renderContextMenu = function ($scope, event, options, tag) {
+    var renderContextMenu = function ($scope, event, options, model) {
         if (!$) { var $ = angular.element; }
         $(event.currentTarget).addClass('context');
         var $contextMenu = $('<div>');
@@ -25,18 +25,18 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event);
                 $a.text(text);
                 $li.append($a);
-                var enabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, tag) : true;
-                if ( enabled ) {
-                    $li.on( 'click', function( $event ) {
+                var enabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
+                if (enabled) {
+                    $li.on('click', function ($event) {
                         $event.preventDefault();
-                        $scope.$apply( function() {
-                            $( event.currentTarget ).removeClass( 'context' );
+                        $scope.$apply(function () {
+                            $(event.currentTarget).removeClass('context');
                             $contextMenu.remove();
-                            item[1].call( $scope, $scope, event, tag );
-                        } );
-                    } );
+                            item[1].call($scope, $scope, event, model);
+                        });
+                    });
                 } else {
-                    $li.on( 'click', function( $event ) {
+                    $li.on('click', function ($event) {
                         $event.preventDefault();
                     });
                     $li.addClass('disabled');
@@ -75,10 +75,10 @@ angular.module('ui.bootstrap.contextMenu', [])
             $scope.$apply(function () {
                 event.preventDefault();
                 var options = $scope.$eval(attrs.contextMenu);
-                var tag = $scope.$eval(attrs.contextMenuTag);
+                var model = $scope.$eval(attrs.model);
                 if (options instanceof Array) {
                     if (options.length === 0) { return; }
-                    renderContextMenu($scope, event, options, tag);
+                    renderContextMenu($scope, event, options, model);
                 } else {
                     throw '"' + attrs.contextMenu + '" not an array';
                 }
