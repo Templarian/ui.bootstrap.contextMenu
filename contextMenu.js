@@ -72,6 +72,7 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
     return function ($scope, element, attrs) {
         element.on('contextmenu', function (event) {
+            event.stopPropagation();
             $scope.$apply(function () {
                 event.preventDefault();
                 var options = $scope.$eval(attrs.contextMenu);
