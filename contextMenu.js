@@ -22,7 +22,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             } else {
                 var $a = $('<a>');
                 $a.attr({ tabindex: '-1', href: '#' });
-                var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event);
+                var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
                 $a.text(text);
                 $li.append($a);
                 var enabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
@@ -72,6 +72,7 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
     return function ($scope, element, attrs) {
         element.on('contextmenu', function (event) {
+            event.stopPropagation();
             $scope.$apply(function () {
                 event.preventDefault();
                 var options = $scope.$eval(attrs.contextMenu);
