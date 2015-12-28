@@ -69,6 +69,9 @@ angular.module('ui.bootstrap.contextMenu', [])
             event.preventDefault();
             $contextMenu.remove();
         });
+        $scope.$on("$destroy", function() {
+            $contextMenu.remove();
+        });
     };
     return function ($scope, element, attrs) {
         element.on('contextmenu', function (event) {
