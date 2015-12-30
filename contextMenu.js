@@ -1,6 +1,6 @@
 angular.module('ui.bootstrap.contextMenu', [])
 
-.directive('contextMenu', ["$parse", function ($parse) {
+.directive('contextMenu', ["$parse", "$q", function ($parse, $q) {
     var renderContextMenu = function ($scope, event, options, model) {
         if (!$) { var $ = angular.element; }
         $(event.currentTarget).addClass('context');
@@ -23,7 +23,9 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var $a = $('<a>');
                 $a.attr({ tabindex: '-1', href: '#' });
                 var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
-                $a.text(text);
+                $q.when(text).then(function(text) {
+                    $a.text(text);
+                });
                 $li.append($a);
                 var enabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
                 if (enabled) {
