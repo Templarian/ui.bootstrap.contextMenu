@@ -27,14 +27,21 @@ angular.module('ui.bootstrap.contextMenu', [])
                     $a.text(text);
                 });
                 $li.append($a);
-                var enabled = angular.isDefined(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
+                var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
                 if (enabled) {
                     $li.on('click', function ($event) {
                         $event.preventDefault();
                         $scope.$apply(function () {
-                            $(event.currentTarget).removeClass('context');
-                            $contextMenu.remove();
-                            item[1].call($scope, $scope, event, model);
+                            if(angular.isArray(item[3])) {
+                                console.log("Got it!");
+                                $event.pageX = event.pageX + $ul.width();
+                                $event.pageY = event.pageY;
+                                renderContextMenu($scope, $event, item[3], model);
+                            } else {
+                                $(event.currentTarget).removeClass('context');
+                                $contextMenu.remove();
+                                item[1].call($scope, $scope, event, model);
+                            }
                         });
                     });
                 } else {
