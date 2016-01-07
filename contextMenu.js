@@ -1,6 +1,15 @@
 angular.module('ui.bootstrap.contextMenu', [])
 
 .directive('contextMenu', ["$parse", "$q", function ($parse, $q) {
+
+    var contextMenus = [];
+
+    var removeContextMenus = function() {
+      while(contextMenus.length) {
+        contextMenus.pop().remove();
+      }
+    };
+
     var renderContextMenu = function ($scope, event, options, model) {
         if (!$) { var $ = angular.element; }
         $(event.currentTarget).addClass('context');
@@ -42,7 +51,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                                 renderContextMenu($scope, $event, item[3], model);
                             } else {
                                 $(event.currentTarget).removeClass('context');
-                                $contextMenu.remove();
+                                removeContextMenus();
                                 item[1].call($scope, $scope, event, model);
                             }
                         });
@@ -74,16 +83,18 @@ angular.module('ui.bootstrap.contextMenu', [])
         $contextMenu.on("mousedown", function (e) {
             if ($(e.target).hasClass('dropdown')) {
                 $(event.currentTarget).removeClass('context');
-                $contextMenu.remove();
+                removeContextMenus();
             }
         }).on('contextmenu', function (event) {
             $(event.currentTarget).removeClass('context');
             event.preventDefault();
-            $contextMenu.remove();
+            removeContextMenus();
         });
         $scope.$on("$destroy", function() {
-            $contextMenu.remove();
+            removeContextMenus();
         });
+
+        contextMenus.push($contextMenu);
     };
     return function ($scope, element, attrs) {
         element.on('contextmenu', function (event) {
