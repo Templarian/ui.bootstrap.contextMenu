@@ -25,15 +25,18 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
                 $q.when(text).then(function(text) {
                     $a.text(text);
+                    if(angular.isArray(item[3])) {
+                        $a.append($("<i class='pull-right glyphicon glyphicon-chevron-right'></i>"))
+                    }
                 });
                 $li.append($a);
+
                 var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
                 if (enabled) {
                     $li.on('click', function ($event) {
                         $event.preventDefault();
                         $scope.$apply(function () {
                             if(angular.isArray(item[3])) {
-                                console.log("Got it!");
                                 $event.pageX = event.pageX + $ul.width();
                                 $event.pageY = event.pageY;
                                 renderContextMenu($scope, $event, item[3], model);
