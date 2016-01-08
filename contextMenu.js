@@ -26,6 +26,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         });
         angular.forEach(options, function (item, i) {
             var $li = $('<li>');
+            console.log($li);
             if (item === null) {
                 $li.addClass('divider');
             } else {
@@ -47,7 +48,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                         $scope.$apply(function () {
                             if(angular.isArray(item[3])) {
                                 $event.pageX = event.pageX + $ul.width();
-                                $event.pageY = event.pageY;
+                                $event.pageY = $li.offset().top - 3;
                                 renderContextMenu($scope, $event, item[3], model);
                             } else {
                                 $(event.currentTarget).removeClass('context');
