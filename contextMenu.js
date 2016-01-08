@@ -44,13 +44,20 @@ angular.module('ui.bootstrap.contextMenu', [])
             if (item === null) {
                 $li.addClass('divider');
             } else {
+                var nestedMenu = null;
+                if(angular.isArray(item[2])) {
+                    nestedMenu = item[2];
+                } else if(angular.isArray(item[3])) {
+                    nestedMenu = item[3];
+                }
+
                 var $a = $('<a>');
                 $a.css("padding-right", "8px");
                 $a.attr({ tabindex: '-1', href: '#' });
                 var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
                 $q.when(text).then(function(text) {
                     $a.text(text);
-                    if(angular.isArray(item[3])) {
+                    if(nestedMenu) {
                         $a.append($("<i class='pull-right glyphicon glyphicon-chevron-right'></i>"))
                     }
                 });
@@ -58,14 +65,18 @@ angular.module('ui.bootstrap.contextMenu', [])
 
                 var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
                 if (enabled) {
+                    var openNestedMenu = function($event) {
+                        removeContextMenus(level + 1);
+                        $event.pageX = event.pageX + $ul.width();
+                        $event.pageY = $li.offset().top - 3;
+                        renderContextMenu($scope, $event, nestedMenu, model, level + 1);
+                    }
+
                     $li.on('click', function ($event) {
                         //$event.preventDefault();
                         $scope.$apply(function () {
-                            if(angular.isArray(item[3])) {
-                                removeContextMenus(level + 1);
-                                $event.pageX = event.pageX + $ul.width();
-                                $event.pageY = $li.offset().top - 3;
-                                renderContextMenu($scope, $event, item[3], model, level + 1);
+                            if(nestedMenu) {
+                                openNestedMenu($event);
                             } else {
                                 $(event.currentTarget).removeClass('context');
                                 removeContextMenus();
@@ -76,11 +87,8 @@ angular.module('ui.bootstrap.contextMenu', [])
 
                     $li.on('mouseover', function ($event) {
                         $scope.$apply(function () {
-                            if(angular.isArray(item[3])) {
-                                removeContextMenus(level + 1);
-                                $event.pageX = event.pageX + $ul.width();
-                                $event.pageY = $li.offset().top - 3;
-                                renderContextMenu($scope, $event, item[3], model, level + 1);
+                            if(nestedMenu) {
+                                openNestedMenu($event);
                             }
                         });
                     });
@@ -109,7 +117,6 @@ angular.module('ui.bootstrap.contextMenu', [])
         });
         $(document).find('body').append($contextMenu);
         $contextMenu.on("mousedown", function (e) {
-            console.log(e);
             if ($(e.target).hasClass('dropdown')) {
                 $(event.currentTarget).removeClass('context');
                 removeContextMenus();
