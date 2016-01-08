@@ -26,7 +26,6 @@ angular.module('ui.bootstrap.contextMenu', [])
         });
         angular.forEach(options, function (item, i) {
             var $li = $('<li>');
-            console.log($li);
             if (item === null) {
                 $li.addClass('divider');
             } else {
