@@ -13,8 +13,6 @@ angular.module('ui.bootstrap.contextMenu', [])
         }
     };
 
-    var $currentContext
-
     var $currentContextMenu = null;
 
     var renderContextMenu = function ($scope, event, options, model, level) {
@@ -60,7 +58,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                 });
                 $li.append($a);
 
-                var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, text, model) : true;
+                var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, model, text) : true;
                 if (enabled) {
                     var openNestedMenu = function ($event) {
                         removeContextMenus(level + 1);

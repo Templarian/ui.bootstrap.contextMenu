@@ -110,11 +110,11 @@ body > .dropdown {
 }
 ```
 
-## Limitations (work in progress)
+## Nested Menus (v0.9.5+)
 
-Nested lists are not supported yet, because I have not needed it yet. If you add it please do a pull request.
+Nested lists work by appending an array as the last index of any list of menu items.
 
-```JS
+```js
 $scope.menuOptions = [
     ['Parent Item 1', function ($itemScope) {
         // Code
