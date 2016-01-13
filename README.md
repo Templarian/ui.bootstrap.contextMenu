@@ -5,7 +5,9 @@ AngularJS UI Bootstrap Module for adding context menus to elements. [Demo](http:
 - `npm install angular-bootstrap-contextmenu` or
 - `bower install angular-bootstrap-contextmenu`
 
-[![Example](http://templarian.com/files/angularjs_contextmenu.png)](http://codepen.io/templarian/pen/VLKZLB)
+
+
+[![Example](http://i.imgur.com/U3xybfE.png)](http://codepen.io/templarian/pen/VLKZLB)
 
 ## Usage
 
