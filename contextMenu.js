@@ -69,7 +69,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                         renderContextMenu($scope, ev, nestedMenu, model, level + 1);
                     }
                     $li.on('click', function ($event) {
-                        //$event.preventDefault();
+                        $event.preventDefault();
                         $scope.$apply(function () {
                             if (nestedMenu) {
                                 openNestedMenu($event);
