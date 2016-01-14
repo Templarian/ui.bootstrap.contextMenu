@@ -76,7 +76,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                             } else {
                                 $(event.currentTarget).removeClass('context');
                                 removeContextMenus();
-                                item[1].call($scope, $scope, event, model);
+                                item[1].call($scope, $scope, event, model, text);
                             }
                         });
                     });
