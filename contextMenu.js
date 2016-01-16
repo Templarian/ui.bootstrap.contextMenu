@@ -36,6 +36,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             top: event.pageY + 'px',
             "z-index": 10000
         });
+        var $promises = [];
         angular.forEach(options, function (item, i) {
             var $li = $('<li>');
             if (item === null) {
@@ -49,7 +50,9 @@ angular.module('ui.bootstrap.contextMenu', [])
                 $a.css("padding-right", "8px");
                 $a.attr({ tabindex: '-1', href: '#' });
                 var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
-                $q.when(text).then(function (text) {
+                $promise = $q.when(text)
+                $promises.push($promise);
+                $promise.then(function (text) {
                     $a.text(text);
                     if (nestedMenu) {
                         $a.css("cursor", "default");
@@ -112,6 +115,35 @@ angular.module('ui.bootstrap.contextMenu', [])
             zIndex: 9999
         });
         $(document).find('body').append($contextMenu);
+
+        //calculate if drop down menu would go out of screen at left or bottom
+        // calculation need to be done after element has been added (and all texts are set; thus thepromises)
+        // to the DOM the get the actual height
+        $q.all($promises).then(function(){
+            if(level === 0){
+                var topCoordinate = event.pageY;
+                var menuHeight = angular.element($ul[0]).prop('offsetHeight');
+                var winHeight = event.view.innerHeight;
+                if (topCoordinate > menuHeight && winHeight - topCoordinate < menuHeight) {
+                    topCoordinate = event.pageY - menuHeight;
+                }
+
+                var leftCoordinate = event.pageX;
+                var menuWidth = angular.element($ul[0]).prop('offsetWidth');
+                var winWidth = event.view.innerWidth;
+                if(leftCoordinate > menuWidth && winWidth - leftCoordinate < menuWidth){
+                    leftCoordinate = event.pageX - menuWidth;
+                }
+
+                $ul.css({
+                    display: 'block',
+                    position: 'absolute',
+                    left: leftCoordinate + 'px',
+                    top: topCoordinate + 'px'
+                });
+            } 
+        });
+
         $contextMenu.on("mousedown", function (e) {
             if ($(e.target).hasClass('dropdown')) {
                 $(event.currentTarget).removeClass('context');
