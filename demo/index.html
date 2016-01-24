@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title>Demo</title>
+    <link rel="stylesheet" media="all" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" media="all" href="styles.css">
+</head>
+<body>
+<div ng-app="app" ng-controller="DemoController">
+    <div>
+        <strong>Gold: </strong>
+        {{player.gold}}
+    </div>
+    <div class="list-group">
+        <a href="#"
+           class="list-group-item"
+           ng-repeat="item in items"
+           context-menu="menuOptions">
+            <span class="badge">{{item.cost}}</span>
+            {{item.name}}
+        </a>
+    </div>
+    <button class="btn btn-default"
+            context-menu="otherMenuOptions"
+            model="'Red'">Right Click</button>
+
+    <br/>
+    <br/>
+    <button class="btn btn-default"
+            context-menu="customHTMLOptions"
+            >Custom HTML</button>
+
+</div>
+
+<script src="../node_modules/angular/angular.min.js"></script>
+<script src="../contextMenu.js"></script>
+<script src="demo.js"></script>
+</body>
+
+</html>
