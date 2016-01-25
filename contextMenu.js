@@ -1,9 +1,26 @@
+
 angular.module('ui.bootstrap.contextMenu', [])
 
-.directive('contextMenu', ["$parse", "$q", function ($parse, $q) {
+.service('customService', function() {
+    "use strict";
+
+    return {
+        initialize: function(item) {
+            console.log("got here", item);
+        }
+    }
+
+})
+.directive('contextMenu', ["$parse", "$q","customService","$sce", function ($parse, $q, custom, $sce) {
 
     var contextMenus = [];
+    var $currentContextMenu = null;
+    var defaultItemText = "New Item";
 
+    /**
+     * Remove context menu.
+     * @param level
+     */
     var removeContextMenus = function (level) {
         while (contextMenus.length && (!level || contextMenus.length > level)) {
             contextMenus.pop().remove();
@@ -13,112 +30,103 @@ angular.module('ui.bootstrap.contextMenu', [])
         }
     };
 
-    var $currentContextMenu = null;
 
-    var renderContextMenu = function ($scope, event, options, model, level) {
-        if (!level) { level = 0; }
-        if (!$) { var $ = angular.element; }
-        $(event.currentTarget).addClass('context');
-        var $contextMenu = $('<div>');
-        if ($currentContextMenu) {
-            $contextMenu = $currentContextMenu;
-        } else {
-            $currentContextMenu = $contextMenu;
+    var processTextItem = function($scope, item, text, event, model,$promises, nestedMenu, $) {
+        "use strict";
+
+        var $a = $('<a>');
+        $a.css("padding-right", "8px");
+        $a.attr({ tabindex: '-1', href: '#' });
+
+        if(typeof item[0] === 'string') {
+            text = item[0];
         }
-        $contextMenu.addClass('dropdown clearfix');
-        var $ul = $('<ul>');
-        $ul.addClass('dropdown-menu');
-        $ul.attr({ 'role': 'menu' });
-        $ul.css({
-            display: 'block',
-            position: 'absolute',
-            left: event.pageX + 'px',
-            top: event.pageY + 'px',
-            "z-index": 10000
-        });
-        var $promises = [];
-        angular.forEach(options, function (item, i) {
-            var $li = $('<li>');
-            if (item === null) {
-                $li.addClass('divider');
-            } else {
-                var nestedMenu = angular.isArray(item[1])
-                  ? item[1] : angular.isArray(item[2])
-                  ? item[2] : angular.isArray(item[3])
-                  ? item[3] : null;
-                var $a = $('<a>');
-                $a.css("padding-right", "8px");
-                $a.attr({ tabindex: '-1', href: '#' });
-                var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
-                $promise = $q.when(text)
-                $promises.push($promise);
-                $promise.then(function (text) {
-                    $a.text(text);
-                    if (nestedMenu) {
-                        $a.css("cursor", "default");
-                        $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
-                    }
-                });
-                $li.append($a);
+        else if(typeof item[0] === "function") {
+            item[0].call($scope, $scope, event, model);
+        } else if (typeof item.text !== "undefined") {
+            text = item.text;
+        }
 
-                var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, model, text) : true;
-                if (enabled) {
-                    var openNestedMenu = function ($event) {
-                        removeContextMenus(level + 1);
-                        var ev = {
-                            pageX: event.pageX + $ul[0].offsetWidth - 1,
-                            pageY: $ul[0].offsetTop + $li[0].offsetTop - 3
-                        };
-                        renderContextMenu($scope, ev, nestedMenu, model, level + 1);
-                    }
-                    $li.on('click', function ($event) {
-                        $event.preventDefault();
-                        $scope.$apply(function () {
-                            if (nestedMenu) {
-                                openNestedMenu($event);
-                            } else {
-                                $(event.currentTarget).removeClass('context');
-                                removeContextMenus();
-                                item[1].call($scope, $scope, event, model, text);
-                            }
-                        });
-                    });
-
-                    $li.on('mouseover', function ($event) {
-                        $scope.$apply(function () {
-                            if (nestedMenu) {
-                                openNestedMenu($event);
-                            }
-                        });
-                    });
-                } else {
-                    $li.on('click', function ($event) {
-                        $event.preventDefault();
-                    });
-                    $li.addClass('disabled');
-                }
+        var $promise = $q.when(text);
+        $promises.push($promise);
+        $promise.then(function (text) {
+            $a.text(text);
+            if (nestedMenu) {
+                $a.css("cursor", "default");
+                $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
             }
-            $ul.append($li);
         });
-        $contextMenu.append($ul);
-        var height = Math.max(
-            document.body.scrollHeight, document.documentElement.scrollHeight,
-            document.body.offsetHeight, document.documentElement.offsetHeight,
-            document.body.clientHeight, document.documentElement.clientHeight
-        );
-        $contextMenu.css({
-            width: '100%',
-            height: height + 'px',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            zIndex: 9999
-        });
-        $(document).find('body').append($contextMenu);
 
-        //calculate if drop down menu would go out of screen at left or bottom
-        // calculation need to be done after element has been added (and all texts are set; thus thepromises)
-        // to the DOM the get the actual height
+        return $a;
+
+    };
+
+
+    /**
+     * Process individual item
+     * @param $scope
+     * @param event
+     * @param model
+     * @param item
+     * @param $ul
+     * @param $li
+     * @param $promises
+     * @param $q
+     * @param $
+     */
+    var processItem = function($scope, event, model, item, $ul, $li, $promises, $q, $) {
+        "use strict";
+        var nestedMenu = angular.isArray(item[1])
+            ? item[1] : angular.isArray(item[2])
+            ? item[2] : angular.isArray(item[3])
+            ? item[3] : null;
+
+        // if html property is not defined, fallback to text, otherwise use default text
+        // if first item in the item array is a function then invoke .call()
+        // if first item is a string, then text should be the string.
+
+        var text = defaultItemText;
+        if(typeof item[0] === 'string' || typeof item.text !== "undefined") {
+            text = processTextItem($scope, item, text, event, model,$promises, nestedMenu, $);
+        }
+        else if(typeof item.html !== "undefined") {
+            // leave styling open to dev
+            text = item.html
+        }
+
+        $li.append(text);
+
+
+
+
+        // if item is object, and has enabled prop invoke the prop
+        // els if fallback to item[2]
+
+        var isEnabled = function () {
+            if(typeof item.enabled !== "undefined") {
+                return item.enabled.call($scope, $scope, event, model, text);
+            } else if(typeof item[2] === "function"){
+                return item[2].call($scope, $scope, event, model, text);
+            } else {
+                return true;
+            }
+        };
+
+        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, model, text, event, $);
+    };
+
+
+    /**
+     * calculate if drop down menu would go out of screen at left or bottom
+     * calculation need to be done after element has been added (and all texts are set; thus thepromises)
+     * to the DOM the get the actual height
+     * @param $ul
+     * @param level
+     * @param $promises
+     */
+
+    var handlePromises = function($ul, level, event, $promises) {
+        "use strict";
         $q.all($promises).then(function(){
             if(level === 0){
                 var topCoordinate = event.pageY;
@@ -141,8 +149,124 @@ angular.module('ui.bootstrap.contextMenu', [])
                     left: leftCoordinate + 'px',
                     top: topCoordinate + 'px'
                 });
-            } 
+            }
         });
+
+    };
+
+
+    /**
+     * If item is enabled, register various mouse events
+     * @param $scope
+     * @param enabled
+     * @param $ul
+     * @param $li
+     * @param nestedMenu
+     * @param model
+     */
+    var registerEnabledEvents = function($scope, enabled, item, $ul,  $li, nestedMenu, model, text, event, $) {
+        if (enabled) {
+
+            var openNestedMenu = function ($event) {
+                removeContextMenus(level + 1);
+                var ev = {
+                    pageX: event.pageX + $ul[0].offsetWidth - 1,
+                    pageY: $ul[0].offsetTop + $li[0].offsetTop - 3
+                };
+                renderContextMenu($scope, ev, nestedMenu, model, level + 1);
+            };
+
+            $li.on('click', function ($event) {
+                $event.preventDefault();
+                $scope.$apply(function () {
+                    if (nestedMenu) {
+                        openNestedMenu($event);
+                    } else {
+                        $(event.currentTarget).removeClass('context');
+                        removeContextMenus();
+
+                        if(angular.isFunction(item[1])) {
+                            item[1].call($scope, $scope, event, model, text)
+                        } else {
+                            item.click.call($scope, $scope, event, model, text);
+                        }
+                    }
+                });
+            });
+
+            $li.on('mouseover', function ($event) {
+                $scope.$apply(function () {
+                    if (nestedMenu) {
+                        openNestedMenu($event);
+                    }
+                });
+            });
+        } else {
+            $li.on('click', function ($event) {
+                $event.preventDefault();
+            });
+            $li.addClass('disabled');
+        }
+
+    };
+
+
+    var renderContextMenu = function ($scope, event, options, model, level) {
+        if (!level) { level = 0; }
+        if (!$) { var $ = angular.element; }
+        $(event.currentTarget).addClass('context');
+        var $contextMenu = $('<div>');
+        if ($currentContextMenu) {
+            $contextMenu = $currentContextMenu;
+        } else {
+            $currentContextMenu = $contextMenu;
+        }
+        $contextMenu.addClass('dropdown clearfix');
+        var $ul = $('<ul>');
+        $ul.addClass('dropdown-menu');
+        $ul.attr({ 'role': 'menu' });
+        $ul.css({
+            display: 'block',
+            position: 'absolute',
+            left: event.pageX + 'px',
+            top: event.pageY + 'px',
+            "z-index": 10000
+        });
+
+        var $promises = [];
+
+        angular.forEach(options, function (item) {
+
+            var $li = $('<li>');
+            if (item === null) {
+                $li.addClass('divider');
+            }
+            else if(typeof item[0] === "object") {
+                custom.initialize($li, item);
+            }
+            else {
+                processItem($scope, event, model, item, $ul, $li, $promises, $q, $);
+            }
+
+            $ul.append($li);
+        });
+        $contextMenu.append($ul);
+        var height = Math.max(
+            document.body.scrollHeight, document.documentElement.scrollHeight,
+            document.body.offsetHeight, document.documentElement.offsetHeight,
+            document.body.clientHeight, document.documentElement.clientHeight
+        );
+        $contextMenu.css({
+            width: '100%',
+            height: height + 'px',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 9999
+        });
+        $(document).find('body').append($contextMenu);
+
+        handlePromises($ul, level, event, $promises);
 
         $contextMenu.on("mousedown", function (e) {
             if ($(e.target).hasClass('dropdown')) {
@@ -154,6 +278,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             event.preventDefault();
             removeContextMenus(level);
         });
+
         $scope.$on("$destroy", function () {
             removeContextMenus();
         });

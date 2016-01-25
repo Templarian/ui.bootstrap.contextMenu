@@ -1,0 +1,4 @@
+body > div,
+body > div > div {
+    padding: 10px;
+}
