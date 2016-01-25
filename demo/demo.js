@@ -42,7 +42,6 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
                 ]
             ];
 
-
             var customHtml = '<div style="cursor: pointer; background-color: pink"><i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
             var customItem = {
                 html: customHtml, click: function ($itemScope, $event, value) {
