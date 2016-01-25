@@ -119,11 +119,18 @@ body > .dropdown {
 ```
 var customHtml = '<div style="cursor: pointer; background-color: pink">' +
                  '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
+                 
 var customItem = {
-    html: customHtml, enabled: function() {return true} , click: function ($itemScope, $event, value) {
+    html: customHtml, 
+    enabled: function() {return true}, 
+    click: function ($itemScope, $event, value) {
         alert("custom html");
-    }
-};
+    }};
+    
+$scope.customHTMLOptions = [customItem,
+    ['Example 1', function ($itemScope, $event, value) {
+        alert("Example 1");
+    }]
 ```
 
 ## Nested Menus (v0.9.5+)
