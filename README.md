@@ -113,6 +113,19 @@ body > .dropdown {
 }
 ```
 
+
+## Custom HTML
+
+```
+var customHtml = '<div style="cursor: pointer; background-color: pink">' +
+                 '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
+var customItem = {
+    html: customHtml, click: function ($itemScope, $event, value) {
+        alert("custom html");
+    }
+};
+```
+
 ## Nested Menus (v0.9.5+)
 
 Nested lists work by appending an array as the last index of any list of menu items.
