@@ -1,8 +1,21 @@
+
 angular.module('ui.bootstrap.contextMenu', [])
 
-.directive('contextMenu', ["$parse", "$q", function ($parse, $q) {
+.service('customService', function() {
+    "use strict";
+
+    return {
+        initialize: function(item) {
+            console.log("got here", item);
+        }
+    }
+
+})
+.directive('contextMenu', ["$parse", "$q","customService","$sce", function ($parse, $q, custom, $sce) {
 
     var contextMenus = [];
+    var $currentContextMenu = null;
+    var defaultItemText = "New Item";
 
     /**
      * Remove context menu.
@@ -17,7 +30,36 @@ angular.module('ui.bootstrap.contextMenu', [])
         }
     };
 
-    var $currentContextMenu = null;
+
+    var processTextItem = function($scope, item, text, event, model,$promises, nestedMenu, $) {
+        "use strict";
+
+        var $a = $('<a>');
+        $a.css("padding-right", "8px");
+        $a.attr({ tabindex: '-1', href: '#' });
+
+        if(typeof item[0] === 'string') {
+            text = item[0];
+        }
+        else if(typeof item[0] === "function") {
+            item[0].call($scope, $scope, event, model);
+        } else if (typeof item.text !== "undefined") {
+            text = item.text;
+        }
+
+        var $promise = $q.when(text);
+        $promises.push($promise);
+        $promise.then(function (text) {
+            $a.text(text);
+            if (nestedMenu) {
+                $a.css("cursor", "default");
+                $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
+            }
+        });
+
+        return $a;
+
+    };
 
 
     /**
@@ -38,23 +80,39 @@ angular.module('ui.bootstrap.contextMenu', [])
             ? item[1] : angular.isArray(item[2])
             ? item[2] : angular.isArray(item[3])
             ? item[3] : null;
-        var $a = $('<a>');
-        $a.css("padding-right", "8px");
-        $a.attr({ tabindex: '-1', href: '#' });
-        var text = typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope, event, model);
-        var $promise = $q.when(text);
-        $promises.push($promise);
-        $promise.then(function (text) {
-            $a.text(text);
-            if (nestedMenu) {
-                $a.css("cursor", "default");
-                $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
-            }
-        });
-        $li.append($a);
 
-        var enabled = angular.isFunction(item[2]) ? item[2].call($scope, $scope, event, model, text) : true;
-        registerEnabledEvents($scope, enabled, item, $ul, $li, nestedMenu, model, text, $);
+        // if html property is not defined, fallback to text, otherwise use default text
+        // if first item in the item array is a function then invoke .call()
+        // if first item is a string, then text should be the string.
+
+        var text = defaultItemText;
+        if(typeof item[0] === 'string' || typeof item.text !== "undefined") {
+            text = processTextItem($scope, item, text, event, model,$promises, nestedMenu, $);
+        }
+        else if(typeof item.html !== "undefined") {
+            // leave styling open to dev
+            text = item.html
+        }
+
+        $li.append(text);
+
+
+
+
+        // if item is object, and has enabled prop invoke the prop
+        // els if fallback to item[2]
+
+        var isEnabled = function () {
+            if(typeof item.enabled !== "undefined") {
+                return item.enabled.call($scope, $scope, event, model, text);
+            } else if(typeof item[2] === "function"){
+                return item[2].call($scope, $scope, event, model, text);
+            } else {
+                return true;
+            }
+        };
+
+        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, model, text, event, $);
     };
 
 
@@ -67,7 +125,7 @@ angular.module('ui.bootstrap.contextMenu', [])
      * @param $promises
      */
 
-    var handlePromises = function($ul, level, $promises) {
+    var handlePromises = function($ul, level, event, $promises) {
         "use strict";
         $q.all($promises).then(function(){
             if(level === 0){
@@ -106,7 +164,7 @@ angular.module('ui.bootstrap.contextMenu', [])
      * @param nestedMenu
      * @param model
      */
-    var registerEnabledEvents = function($scope, enabled, item, $ul,  $li, nestedMenu, model, text, $) {
+    var registerEnabledEvents = function($scope, enabled, item, $ul,  $li, nestedMenu, model, text, event, $) {
         if (enabled) {
 
             var openNestedMenu = function ($event) {
@@ -126,7 +184,12 @@ angular.module('ui.bootstrap.contextMenu', [])
                     } else {
                         $(event.currentTarget).removeClass('context');
                         removeContextMenus();
-                        item[1].call($scope, $scope, event, model, text);
+
+                        if(angular.isFunction(item[1])) {
+                            item[1].call($scope, $scope, event, model, text)
+                        } else {
+                            item.click.call($scope, $scope, event, model, text);
+                        }
                     }
                 });
             });
@@ -172,13 +235,19 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         var $promises = [];
 
-        angular.forEach(options, function (item, i) {
+        angular.forEach(options, function (item) {
+
             var $li = $('<li>');
             if (item === null) {
                 $li.addClass('divider');
-            } else {
+            }
+            else if(typeof item[0] === "object") {
+                custom.initialize($li, item);
+            }
+            else {
                 processItem($scope, event, model, item, $ul, $li, $promises, $q, $);
             }
+
             $ul.append($li);
         });
         $contextMenu.append($ul);
@@ -197,7 +266,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         });
         $(document).find('body').append($contextMenu);
 
-        handlePromises($ul, level, $promises);
+        handlePromises($ul, level, event, $promises);
 
         $contextMenu.on("mousedown", function (e) {
             if ($(e.target).hasClass('dropdown')) {
