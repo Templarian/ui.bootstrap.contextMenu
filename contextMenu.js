@@ -53,11 +53,11 @@ angular.module('ui.bootstrap.contextMenu', [])
                 $promise = $q.when(text)
                 $promises.push($promise);
                 $promise.then(function (text) {
-                    $a.text(text);
                     if (nestedMenu) {
                         $a.css("cursor", "default");
                         $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
                     }
+                    $a.append(text);
                 });
                 $li.append($a);
 
