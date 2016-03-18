@@ -57,7 +57,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-    var processItem = function ($scope, event, model, item, $ul, $li, $promises, $q, $) {
+    var processItem = function ($scope, event, model, item, $ul, $li, $promises, $q, $, level) {
         /// <summary>Process individual item</summary>
         "use strict";
         var nestedMenu = angular.isArray(item[1])
@@ -96,7 +96,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             }
         };
 
-        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, model, text, event, $);
+        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, model, text, event, $, level);
     };
 
     var handlePromises = function ($ul, level, event, $promises) {
@@ -133,7 +133,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-    var registerEnabledEvents = function ($scope, enabled, item, $ul, $li, nestedMenu, model, text, event, $) {
+    var registerEnabledEvents = function ($scope, enabled, item, $ul, $li, nestedMenu, model, text, event, $, level) {
         /// <summary>If item is enabled, register various mouse events.</summary>
         if (enabled) {
             var openNestedMenu = function ($event) {
@@ -213,7 +213,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             } else if (typeof item[0] === "object") {
                 custom.initialize($li, item);
             } else {
-                processItem($scope, event, model, item, $ul, $li, $promises, $q, $);
+                processItem($scope, event, model, item, $ul, $li, $promises, $q, $, level);
             }
             $ul.append($li);
         });
