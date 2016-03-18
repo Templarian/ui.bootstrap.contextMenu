@@ -1,27 +1,23 @@
-
 angular.module('ui.bootstrap.contextMenu', [])
 
-.service('customService', function() {
+.service('CustomService', function () {
     "use strict";
 
     return {
-        initialize: function(item) {
+        initialize: function (item) {
             console.log("got here", item);
         }
     }
 
 })
-.directive('contextMenu', ["$parse", "$q","customService","$sce", function ($parse, $q, custom, $sce) {
+.directive('contextMenu', ["$parse", "$q", "CustomService", "$sce", function ($parse, $q, custom, $sce) {
 
     var contextMenus = [];
     var $currentContextMenu = null;
     var defaultItemText = "New Item";
 
-    /**
-     * Remove context menu.
-     * @param level
-     */
     var removeContextMenus = function (level) {
+        /// <summary>Remove context menu.</summary>
         while (contextMenus.length && (!level || contextMenus.length > level)) {
             contextMenus.pop().remove();
         }
@@ -31,17 +27,17 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
 
 
-    var processTextItem = function($scope, item, text, event, model,$promises, nestedMenu, $) {
+    var processTextItem = function ($scope, item, text, event, model, $promises, nestedMenu, $) {
         "use strict";
 
         var $a = $('<a>');
         $a.css("padding-right", "8px");
         $a.attr({ tabindex: '-1', href: '#' });
 
-        if(typeof item[0] === 'string') {
+        if (typeof item[0] === 'string') {
             text = item[0];
         }
-        else if(typeof item[0] === "function") {
+        else if (typeof item[0] === "function") {
             item[0].call($scope, $scope, event, model);
         } else if (typeof item.text !== "undefined") {
             text = item.text;
@@ -61,20 +57,8 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-
-    /**
-     * Process individual item
-     * @param $scope
-     * @param event
-     * @param model
-     * @param item
-     * @param $ul
-     * @param $li
-     * @param $promises
-     * @param $q
-     * @param $
-     */
-    var processItem = function($scope, event, model, item, $ul, $li, $promises, $q, $) {
+    var processItem = function ($scope, event, model, item, $ul, $li, $promises, $q, $) {
+        /// <summary>Process individual item</summary>
         "use strict";
         var nestedMenu = angular.isArray(item[1])
             ? item[1] : angular.isArray(item[2])
@@ -86,10 +70,10 @@ angular.module('ui.bootstrap.contextMenu', [])
         // if first item is a string, then text should be the string.
 
         var text = defaultItemText;
-        if(typeof item[0] === 'string' || typeof item.text !== "undefined") {
-            text = processTextItem($scope, item, text, event, model,$promises, nestedMenu, $);
+        if (typeof item[0] === 'string' || typeof item.text !== "undefined") {
+            text = processTextItem($scope, item, text, event, model, $promises, nestedMenu, $);
         }
-        else if(typeof item.html !== "undefined") {
+        else if (typeof item.html !== "undefined") {
             // leave styling open to dev
             text = item.html
         }
@@ -103,9 +87,9 @@ angular.module('ui.bootstrap.contextMenu', [])
         // els if fallback to item[2]
 
         var isEnabled = function () {
-            if(typeof item.enabled !== "undefined") {
+            if (typeof item.enabled !== "undefined") {
                 return item.enabled.call($scope, $scope, event, model, text);
-            } else if(typeof item[2] === "function"){
+            } else if (typeof item[2] === "function") {
                 return item[2].call($scope, $scope, event, model, text);
             } else {
                 return true;
@@ -115,20 +99,15 @@ angular.module('ui.bootstrap.contextMenu', [])
         registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, model, text, event, $);
     };
 
-
-    /**
-     * calculate if drop down menu would go out of screen at left or bottom
-     * calculation need to be done after element has been added (and all texts are set; thus thepromises)
-     * to the DOM the get the actual height
-     * @param $ul
-     * @param level
-     * @param $promises
-     */
-
-    var handlePromises = function($ul, level, event, $promises) {
+    var handlePromises = function ($ul, level, event, $promises) {
+        /// <summary>
+        /// calculate if drop down menu would go out of screen at left or bottom
+        /// calculation need to be done after element has been added (and all texts are set; thus thepromises)
+        /// to the DOM the get the actual height
+        /// </summary>
         "use strict";
-        $q.all($promises).then(function(){
-            if(level === 0){
+        $q.all($promises).then(function () {
+            if (level === 0) {
                 var topCoordinate = event.pageY;
                 var menuHeight = angular.element($ul[0]).prop('offsetHeight');
                 var winHeight = event.view.innerHeight;
@@ -139,7 +118,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var leftCoordinate = event.pageX;
                 var menuWidth = angular.element($ul[0]).prop('offsetWidth');
                 var winWidth = event.view.innerWidth;
-                if(leftCoordinate > menuWidth && winWidth - leftCoordinate < menuWidth){
+                if (leftCoordinate > menuWidth && winWidth - leftCoordinate < menuWidth) {
                     leftCoordinate = event.pageX - menuWidth;
                 }
 
@@ -154,19 +133,9 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-
-    /**
-     * If item is enabled, register various mouse events
-     * @param $scope
-     * @param enabled
-     * @param $ul
-     * @param $li
-     * @param nestedMenu
-     * @param model
-     */
-    var registerEnabledEvents = function($scope, enabled, item, $ul,  $li, nestedMenu, model, text, event, $) {
+    var registerEnabledEvents = function ($scope, enabled, item, $ul, $li, nestedMenu, model, text, event, $) {
+        /// <summary>If item is enabled, register various mouse events.</summary>
         if (enabled) {
-
             var openNestedMenu = function ($event) {
                 removeContextMenus(level + 1);
                 var ev = {
@@ -185,7 +154,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                         $(event.currentTarget).removeClass('context');
                         removeContextMenus();
 
-                        if(angular.isFunction(item[1])) {
+                        if (angular.isFunction(item[1])) {
                             item[1].call($scope, $scope, event, model, text)
                         } else {
                             item.click.call($scope, $scope, event, model, text);
@@ -212,6 +181,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
 
     var renderContextMenu = function ($scope, event, options, model, level) {
+        /// <summary>Render context menu recursively.</summary>
         if (!level) { level = 0; }
         if (!$) { var $ = angular.element; }
         $(event.currentTarget).addClass('context');
@@ -240,14 +210,11 @@ angular.module('ui.bootstrap.contextMenu', [])
             var $li = $('<li>');
             if (item === null) {
                 $li.addClass('divider');
-            }
-            else if(typeof item[0] === "object") {
+            } else if (typeof item[0] === "object") {
                 custom.initialize($li, item);
-            }
-            else {
+            } else {
                 processItem($scope, event, model, item, $ul, $li, $promises, $q, $);
             }
-
             $ul.append($li);
         });
         $contextMenu.append($ul);

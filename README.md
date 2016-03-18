@@ -141,12 +141,14 @@ Nested lists work by appending an array as the last index of any list of menu it
 $scope.menuOptions = [
     ['Parent Item 1', function ($itemScope) {
         // Code
-    },  ['Child Item 1', function ($itemScope) {
-            // Code
-        }],
-        ['Child Item 2', function ($itemScope) {
-            // Code
-        }]
+    },  [
+            ['Child Item 1', function ($itemScope) {
+                // Code
+            }],
+            ['Child Item 2', function ($itemScope) {
+                // Code
+            }]
+        ]
     ]
 ];
 ```
