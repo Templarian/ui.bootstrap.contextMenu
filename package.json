@@ -24,8 +24,5 @@
     "url": "https://github.com/Templarian/ui.bootstrap.contextMenu/issues"
   },
   "homepage": "https://github.com/Templarian/ui.bootstrap.contextMenu#readme",
-  "devDependencies": {
-    "angular": "^1.4.9",
-    "bootstrap": "^3.3.6"
-  }
+  "devDependencies": {}
 }
