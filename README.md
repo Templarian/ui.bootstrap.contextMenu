@@ -2,9 +2,12 @@
 
 AngularJS UI Bootstrap Module for adding context menus to elements. [Demo](http://codepen.io/templarian/pen/VLKZLB)
 
-`bower install angular-bootstrap-contextmenu`
+- `npm install angular-bootstrap-contextmenu` or
+- `bower install angular-bootstrap-contextmenu`
 
-[![Example](http://templarian.com/files/angularjs_contextmenu.png)](http://codepen.io/templarian/pen/VLKZLB)
+
+
+[![Example](http://i.imgur.com/U3xybfE.png)](http://codepen.io/templarian/pen/VLKZLB)
 
 ## Usage
 
@@ -110,20 +113,42 @@ body > .dropdown {
 }
 ```
 
-## Limitations (work in progress)
 
-Nested lists are not supported yet, because I have not needed it yet. If you add it please do a pull request.
+## Custom HTML
 
-```JS
+```
+var customHtml = '<div style="cursor: pointer; background-color: pink">' +
+                 '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
+                 
+var customItem = {
+    html: customHtml, 
+    enabled: function() {return true}, 
+    click: function ($itemScope, $event, value) {
+        alert("custom html");
+    }};
+    
+$scope.customHTMLOptions = [customItem,
+    ['Example 1', function ($itemScope, $event, value) {
+        alert("Example 1");
+    }]
+```
+
+## Nested Menus (v0.9.5+)
+
+Nested lists work by appending an array as the last index of any list of menu items.
+
+```js
 $scope.menuOptions = [
     ['Parent Item 1', function ($itemScope) {
         // Code
-    },  ['Child Item 1', function ($itemScope) {
-            // Code
-        }],
-        ['Child Item 2', function ($itemScope) {
-            // Code
-        }]
+    },  [
+            ['Child Item 1', function ($itemScope) {
+                // Code
+            }],
+            ['Child Item 2', function ($itemScope) {
+                // Code
+            }]
+        ]
     ]
 ];
 ```
