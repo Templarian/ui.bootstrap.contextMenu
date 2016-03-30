@@ -60,10 +60,11 @@ angular.module('ui.bootstrap.contextMenu', [])
     var processItem = function ($scope, event, model, item, $ul, $li, $promises, $q, $, level) {
         /// <summary>Process individual item</summary>
         "use strict";
-        var nestedMenu = angular.isArray(item[1])
-            ? item[1] : angular.isArray(item[2])
-            ? item[2] : angular.isArray(item[3])
-            ? item[3] : null;
+        // nestedMenu is either an Array or a Promise that will return that array.
+        var nestedMenu = angular.isArray(item[1]) || (item[1] && angular.isFunction(item[1].then))
+          ? item[1] : angular.isArray(item[2]) || (item[2] && angular.isFunction(item[2].then))
+          ? item[2] : angular.isArray(item[3]) || (item[3] && angular.isFunction(item[3].then))
+          ? item[3] : null;
 
         // if html property is not defined, fallback to text, otherwise use default text
         // if first item in the item array is a function then invoke .call()
@@ -142,7 +143,14 @@ angular.module('ui.bootstrap.contextMenu', [])
                     pageX: event.pageX + $ul[0].offsetWidth - 1,
                     pageY: $ul[0].offsetTop + $li[0].offsetTop - 3
                 };
-                renderContextMenu($scope, ev, nestedMenu, model, level + 1);
+
+                /*
+                 * At this point, nestedMenu can only either be an Array or a promise.
+                 * Regardless, passing them to when makes the implementation singular.
+                 */
+                $q.when(nestedMenu).then(function(promisedNestedMenu) {
+                    renderContextMenu($scope, ev, promisedNestedMenu, model, level + 1);
+                });
             };
 
             $li.on('click', function ($event) {
