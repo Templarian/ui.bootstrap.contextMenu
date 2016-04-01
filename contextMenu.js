@@ -108,28 +108,37 @@ angular.module('ui.bootstrap.contextMenu', [])
         /// </summary>
         "use strict";
         $q.all($promises).then(function () {
-            if (level === 0) {
-                var topCoordinate = event.pageY;
-                var menuHeight = angular.element($ul[0]).prop('offsetHeight');
-                var winHeight = event.view.innerHeight;
-                if (topCoordinate > menuHeight && winHeight - topCoordinate < menuHeight) {
-                    topCoordinate = event.pageY - menuHeight;
+            var topCoordinate = event.pageY;
+            var menuHeight = angular.element($ul[0]).prop('offsetHeight');
+            var winHeight = event.view.innerHeight;
+            if (topCoordinate > menuHeight && winHeight - topCoordinate < menuHeight) {
+                topCoordinate = event.pageY - menuHeight;
+            } else if(winHeight <= menuHeight) {
+                // If it really can't fit, reset the height of the menu to one that will fit
+                angular.element($ul[0]).css({"height": winHeight - 5, "overflow-y": "scroll"});
+                // ...then set the topCoordinate height to 0 so the menu starts from the top
+                topCoordinate = 0;
+            } else if(winHeight - topCoordinate < menuHeight) {
+                var reduceThreshold = 5;
+                if(topCoordinate < reduceThreshold) {
+                    reduceThreshold = topCoordinate;
                 }
-
-                var leftCoordinate = event.pageX;
-                var menuWidth = angular.element($ul[0]).prop('offsetWidth');
-                var winWidth = event.view.innerWidth;
-                if (leftCoordinate > menuWidth && winWidth - leftCoordinate < menuWidth) {
-                    leftCoordinate = event.pageX - menuWidth;
-                }
-
-                $ul.css({
-                    display: 'block',
-                    position: 'absolute',
-                    left: leftCoordinate + 'px',
-                    top: topCoordinate + 'px'
-                });
+                topCoordinate = winHeight - menuHeight - reduceThreshold;
             }
+
+            var leftCoordinate = event.pageX;
+            var menuWidth = angular.element($ul[0]).prop('offsetWidth');
+            var winWidth = event.view.innerWidth;
+            if (leftCoordinate > menuWidth && winWidth - leftCoordinate < menuWidth) {
+                leftCoordinate = event.pageX - menuWidth;
+            }
+
+            $ul.css({
+                display: 'block',
+                position: 'absolute',
+                left: leftCoordinate + 'px',
+                top: topCoordinate + 'px'
+            });
         });
 
     };
@@ -139,9 +148,15 @@ angular.module('ui.bootstrap.contextMenu', [])
         if (enabled) {
             var openNestedMenu = function ($event) {
                 removeContextMenus(level + 1);
+                /*
+                 * The object here needs to be constructed and filled with data
+                 * on an "as needed" basis. Copying the data from event directly
+                 * or cloning the event results in unpredictable behavior.
+                 */
                 var ev = {
                     pageX: event.pageX + $ul[0].offsetWidth - 1,
-                    pageY: $ul[0].offsetTop + $li[0].offsetTop - 3
+                    pageY: $ul[0].offsetTop + $li[0].offsetTop - 3,
+                    view: event.view || window
                 };
 
                 /*
