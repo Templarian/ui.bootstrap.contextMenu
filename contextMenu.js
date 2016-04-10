@@ -38,7 +38,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             text = item[0];
         }
         else if (typeof item[0] === "function") {
-            item[0].call($scope, $scope, event, model);
+            text = item[0].call($scope, $scope, event, model);
         } else if (typeof item.text !== "undefined") {
             text = item.text;
         }
@@ -70,7 +70,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         // if first item is a string, then text should be the string.
 
         var text = defaultItemText;
-        if (typeof item[0] === 'string' || typeof item.text !== "undefined") {
+        if (typeof item[0] === 'function' || typeof item[0] === 'string' || typeof item.text !== "undefined") {
             text = processTextItem($scope, item, text, event, model, $promises, nestedMenu, $);
         }
         else if (typeof item.html !== "undefined") {
