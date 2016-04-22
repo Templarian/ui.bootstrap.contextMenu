@@ -1,3 +1,7 @@
+(function($) {
+
+"use strict";
+
 angular.module('ui.bootstrap.contextMenu', [])
 
 .service('CustomService', function () {
@@ -206,7 +210,7 @@ angular.module('ui.bootstrap.contextMenu', [])
     var renderContextMenu = function ($scope, event, options, model, level) {
         /// <summary>Render context menu recursively.</summary>
         if (!level) { level = 0; }
-        if (!$) { var $ = angular.element; }
+        
         $(event.currentTarget).addClass('context');
         var $contextMenu = $('<div>');
         if ($currentContextMenu) {
@@ -292,3 +296,5 @@ angular.module('ui.bootstrap.contextMenu', [])
         });
     };
 }]);
+
+})(angular.element);
