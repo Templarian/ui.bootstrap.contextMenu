@@ -213,8 +213,8 @@ angular.module('ui.bootstrap.contextMenu', [])
             $contextMenu = $currentContextMenu;
         } else {
             $currentContextMenu = $contextMenu;
+            $contextMenu.addClass('angular-bootstrap-contextmenu dropdown clearfix');
         }
-        $contextMenu.addClass('dropdown clearfix');
         var $ul = $('<ul>');
         $ul.addClass('dropdown-menu');
         $ul.attr({ 'role': 'menu' });
