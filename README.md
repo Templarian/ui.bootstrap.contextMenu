@@ -105,10 +105,12 @@ $scope.menuOptions = [
 
 ## Style Overlay
 
+The class `angular-bootstrap-contextmenu` is added to the `<div>` that this context-menu is attached to.
+
 To give a light darker disabled tint while the menu is open add the style below.
 
 ```css
-body > .dropdown {
+body > .angular-bootstrap-contextmenu.dropdown {
     background-color: rgba(0, 0, 0, 0.1);
 }
 ```
