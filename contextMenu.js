@@ -258,12 +258,15 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         handlePromises($ul, level, event, $promises);
 
-        $contextMenu.on("mousedown", function (e) {
-            if ($(e.target).hasClass('dropdown')) {
-                $(event.currentTarget).removeClass('context');
+        function removeAllContextMenus(e) {
+            if (!$(e.target).closest('.dropdown').length) {
                 removeContextMenus();
             }
-        }).on('contextmenu', function (event) {
+        }
+
+        $(document.body).on('mousedown', removeAllContextMenus);
+
+        $contextMenu.on('contextmenu', function (event) {
             $(event.currentTarget).removeClass('context');
             event.preventDefault();
             removeContextMenus(level);
@@ -271,6 +274,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         $scope.$on("$destroy", function () {
             removeContextMenus();
+            $(document.body).off('mousedown', removeAllContextMenus);
         });
 
         contextMenus.push($ul);
