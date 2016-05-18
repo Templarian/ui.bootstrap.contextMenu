@@ -129,8 +129,15 @@ angular.module('ui.bootstrap.contextMenu', [])
             var leftCoordinate = event.pageX;
             var menuWidth = angular.element($ul[0]).prop('offsetWidth');
             var winWidth = event.view.innerWidth;
-            if (leftCoordinate > menuWidth && winWidth - leftCoordinate < menuWidth) {
-                leftCoordinate = event.pageX - menuWidth;
+            var rightPadding = 5;
+            if (leftCoordinate > menuWidth && winWidth - leftCoordinate - rightPadding < menuWidth) {
+                leftCoordinate = winWidth - menuWidth - rightPadding;
+            } else if(winWidth - leftCoordinate < menuWidth) {
+                var reduceThreshold = 5;
+                if(leftCoordinate < reduceThreshold + rightPadding) {
+                    reduceThreshold = leftCoordinate + rightPadding;
+                }
+                leftCoordinate = winWidth - menuWidth - reduceThreshold - rightPadding;
             }
 
             $ul.css({
