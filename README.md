@@ -80,6 +80,14 @@ $scope.menuOptions = function (item) {
 };
 ```
 
+## Custom Class
+
+Add your custom class to top element of the context menu
+
+```html
+<div context-menu="menuOptions" context-menu-class="custom_class"></div>
+```
+
 ## Model Attribute (optional)
 
 In instances where a reference is not passed through the `$itemScope` (i.e. not using `ngRepeat`), there is a `model` attribute that can pass a value.

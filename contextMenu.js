@@ -210,7 +210,7 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
 
 
-    var renderContextMenu = function ($scope, event, options, model, level) {
+    var renderContextMenu = function ($scope, event, options, model, level, customClass) {
         /// <summary>Render context menu recursively.</summary>
         if (!level) { level = 0; }
         if (!$) { var $ = angular.element; }
@@ -221,6 +221,9 @@ angular.module('ui.bootstrap.contextMenu', [])
         } else {
             $currentContextMenu = $contextMenu;
             $contextMenu.addClass('angular-bootstrap-contextmenu dropdown clearfix');
+        }
+        if (customClass) {
+            $contextMenu.addClass(customClass);
         }
         var $ul = $('<ul>');
         $ul.addClass('dropdown-menu');
@@ -289,10 +292,11 @@ angular.module('ui.bootstrap.contextMenu', [])
             $scope.$apply(function () {
                 event.preventDefault();
                 var options = $scope.$eval(attrs.contextMenu);
+                var customClass = attrs.contextMenuClass;
                 var model = $scope.$eval(attrs.model);
                 if (options instanceof Array) {
                     if (options.length === 0) { return; }
-                    renderContextMenu($scope, event, options, model);
+                    renderContextMenu($scope, event, options, model, undefined, customClass);
                 } else {
                     throw '"' + attrs.contextMenu + '" not an array';
                 }
