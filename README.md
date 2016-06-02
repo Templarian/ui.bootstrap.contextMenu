@@ -21,7 +21,15 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 </div>
 <div ng-bind="selected"></div>
 ```
+* OR
 
+```html
+<div>
+    <span>you can specify the event on how the menu opens:</span>
+    <div ng-repeat="item in items" context-menu="menuOptions" context-menu-on="click">Left Click: {{item.name}}</div>
+</div>
+<div ng-bind="selected"></div>
+```
 ### Controller
 
 ```js
@@ -46,7 +54,7 @@ $scope.menuOptions = [
 
 Every menu option has an array with 2-3 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
 
-The third optional index is a function used to enable/disable the item. If the functtion returns true, the item is enabled (default). If no function is provided, the item will be enabled by default. 
+The third optional index is a function used to enable/disable the item. If the functtion returns true, the item is enabled (default). If no function is provided, the item will be enabled by default.
 
 ```js
 $scope.menuOptions = [
@@ -129,14 +137,14 @@ body > .angular-bootstrap-contextmenu.dropdown {
 ```
 var customHtml = '<div style="cursor: pointer; background-color: pink">' +
                  '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
-                 
+
 var customItem = {
-    html: customHtml, 
-    enabled: function() {return true}, 
+    html: customHtml,
+    enabled: function() {return true},
     click: function ($itemScope, $event, value) {
         alert("custom html");
     }};
-    
+
 $scope.customHTMLOptions = [customItem,
     ['Example 1', function ($itemScope, $event, value) {
         alert("Example 1");
