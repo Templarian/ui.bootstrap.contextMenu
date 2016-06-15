@@ -286,6 +286,12 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         contextMenus.push($ul);
     };
+
+    function isTouchDevice() {
+      return 'ontouchstart' in window        // works on most browsers
+          || navigator.maxTouchPoints;       // works on IE10/11 and Surface
+    };
+
     return function ($scope, element, attrs) {
         var openMenuEvent = "contextmenu";
         if(attrs.contextMenuOn && typeof(attrs.contextMenuOn) === "string"){
@@ -293,8 +299,14 @@ angular.module('ui.bootstrap.contextMenu', [])
         }
         element.on(openMenuEvent, function (event) {
             event.stopPropagation();
+            event.preventDefault();
+            
+            // Don't show context menu if on touch device and element is draggable
+            if(isTouchDevice() && element.attr('draggable') === 'true') {
+              return false;
+            }
+
             $scope.$apply(function () {
-                event.preventDefault();
                 var options = $scope.$eval(attrs.contextMenu);
                 var customClass = attrs.contextMenuClass;
                 var model = $scope.$eval(attrs.model);
