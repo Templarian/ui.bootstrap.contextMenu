@@ -74,9 +74,13 @@ angular.module('ui.bootstrap.contextMenu', [])
         if (typeof item[0] === 'function' || typeof item[0] === 'string' || typeof item.text !== "undefined") {
             text = processTextItem($scope, item, text, event, model, $promises, nestedMenu, $);
         }
+        else if (typeof item.html === 'function') {
+            // leave styling open to dev
+            text = item.html($scope);
+        }
         else if (typeof item.html !== "undefined") {
             // leave styling open to dev
-            text = item.html
+            text = item.html;
         }
 
         $li.append(text);
