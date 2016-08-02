@@ -135,6 +135,7 @@ body > .angular-bootstrap-contextmenu.dropdown {
 ## Custom HTML
 
 ```
+// With a custom static string:
 var customHtml = '<div style="cursor: pointer; background-color: pink">' +
                  '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
 
@@ -145,7 +146,18 @@ var customItem = {
         alert("custom html");
     }};
 
-$scope.customHTMLOptions = [customItem,
+// With a custom function returning a string:
+var customItem2 = {
+    html: function($itemScope) {
+        return $itemScope.lastname + ' ' + $itemScope.firstname;
+    },
+    enabled: function() {return true},
+    click: function ($itemScope, $event, value) {
+        alert("custom html");
+    }
+};
+
+$scope.customHTMLOptions = [customItem, customItem2,
     ['Example 1', function ($itemScope, $event, value) {
         alert("Example 1");
     }]
