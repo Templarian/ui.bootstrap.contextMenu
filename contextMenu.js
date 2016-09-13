@@ -274,7 +274,8 @@ angular.module('ui.bootstrap.contextMenu', [])
         handlePromises($ul, level, event, $promises);
 
         function removeAllContextMenus(e) {
-            if (!$(e.target).closest('.dropdown').length) {
+            if ($(e.target).hasClass('angular-bootstrap-contextmenu')) {
+                $(event.currentTarget).removeClass('context');
                 removeContextMenus();
             }
         }
