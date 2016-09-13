@@ -37,6 +37,7 @@ There are currently 5 parameters that are being passed to the callback:
 - modelValue - See "Model Attribute" below
 - text - The HTML value of the text. Normally this contains the &lt;a&gt; tag surrounding the text by default.
 - $li - The list item selected
+
 ### Controller
 
 ```js
