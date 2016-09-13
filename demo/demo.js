@@ -37,15 +37,25 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
         ];
 
         $scope.otherMenuOptions = [
-            ['Favorite Color', function ($itemScope, $event, color) {
-                alert(color);
+            ['Favorite Color', function ($itemScope, event, modelValue, text, $li) {
+                alert(modelValue);
+                console.info($itemScope);
+                console.info(event);
+                console.info(modelValue);
+                console.info(text);
+                console.info($li);
             }]
         ];
 
         var customHtml = '<div style="cursor: pointer; background-color: pink"><i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
         var customItem = {
-            html: customHtml, click: function ($itemScope, $event, value) {
+            html: customHtml, click: function ($itemScope, event, modelValue, text, $li) {
                 alert("custom html");
+                console.info($itemScope);
+                console.info(event);
+                console.info(modelValue);
+                console.info(text);
+                console.info($li);
             }
         };
 

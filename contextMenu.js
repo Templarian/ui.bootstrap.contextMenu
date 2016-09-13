@@ -27,7 +27,7 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
 
 
-    var processTextItem = function ($scope, item, text, event, model, $promises, nestedMenu, $) {
+    var processTextItem = function ($scope, item, text, event, modelValue, $promises, nestedMenu, $) {
         "use strict";
 
         var $a = $('<a>');
@@ -38,7 +38,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             text = item[0];
         }
         else if (typeof item[0] === "function") {
-            text = item[0].call($scope, $scope, event, model);
+            text = item[0].call($scope, $scope, event, modelValue);
         } else if (typeof item.text !== "undefined") {
             text = item.text;
         }
@@ -57,7 +57,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-    var processItem = function ($scope, event, model, item, $ul, $li, $promises, $q, $, level) {
+    var processItem = function ($scope, event, modelValue, item, $ul, $li, $promises, $q, $, level) {
         /// <summary>Process individual item</summary>
         "use strict";
         // nestedMenu is either an Array or a Promise that will return that array.
@@ -72,7 +72,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         var text = defaultItemText;
         if (typeof item[0] === 'function' || typeof item[0] === 'string' || typeof item.text !== "undefined") {
-            text = processTextItem($scope, item, text, event, model, $promises, nestedMenu, $);
+            text = processTextItem($scope, item, text, event, modelValue, $promises, nestedMenu, $);
         }
         else if (typeof item.html === 'function') {
             // leave styling open to dev
@@ -93,15 +93,15 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         var isEnabled = function () {
             if (typeof item.enabled !== "undefined") {
-                return item.enabled.call($scope, $scope, event, model, text);
+                return item.enabled.call($scope, $scope, event, modelValue, text);
             } else if (typeof item[2] === "function") {
-                return item[2].call($scope, $scope, event, model, text);
+                return item[2].call($scope, $scope, event, modelValue, text);
             } else {
                 return true;
             }
         };
 
-        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, model, text, event, $, level);
+        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, modelValue, text, event, $, level);
     };
 
     var handlePromises = function ($ul, level, event, $promises) {
@@ -154,7 +154,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-    var registerEnabledEvents = function ($scope, enabled, item, $ul, $li, nestedMenu, model, text, event, $, level) {
+    var registerEnabledEvents = function ($scope, enabled, item, $ul, $li, nestedMenu, modelValue, text, event, $, level) {
         /// <summary>If item is enabled, register various mouse events.</summary>
         if (enabled) {
             var openNestedMenu = function ($event) {
@@ -175,7 +175,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                  * Regardless, passing them to when makes the implementation singular.
                  */
                 $q.when(nestedMenu).then(function(promisedNestedMenu) {
-                    renderContextMenu($scope, ev, promisedNestedMenu, model, level + 1);
+                    renderContextMenu($scope, ev, promisedNestedMenu, modelValue, level + 1);
                 });
             };
 
@@ -189,9 +189,9 @@ angular.module('ui.bootstrap.contextMenu', [])
                         removeContextMenus();
 
                         if (angular.isFunction(item[1])) {
-                            item[1].call($scope, $scope, event, model, text)
+                            item[1].call($scope, $scope, event, modelValue, text, $li)
                         } else {
-                            item.click.call($scope, $scope, event, model, text);
+                            item.click.call($scope, $scope, event, modelValue, text, $li);
                         }
                     }
                 });
@@ -214,7 +214,7 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
 
 
-    var renderContextMenu = function ($scope, event, options, model, level, customClass) {
+    var renderContextMenu = function ($scope, event, options, modelValue, level, customClass) {
         /// <summary>Render context menu recursively.</summary>
         if (!level) { level = 0; }
         if (!$) { var $ = angular.element; }
@@ -250,7 +250,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             } else if (typeof item[0] === "object") {
                 custom.initialize($li, item);
             } else {
-                processItem($scope, event, model, item, $ul, $li, $promises, $q, $, level);
+                processItem($scope, event, modelValue, item, $ul, $li, $promises, $q, $, level);
             }
             $ul.append($li);
         });
@@ -318,10 +318,10 @@ angular.module('ui.bootstrap.contextMenu', [])
             $scope.$apply(function () {
                 var options = $scope.$eval(attrs.contextMenu);
                 var customClass = attrs.contextMenuClass;
-                var model = $scope.$eval(attrs.model);
+                var modelValue = $scope.$eval(attrs.model);
                 if (options instanceof Array) {
                     if (options.length === 0) { return; }
-                    renderContextMenu($scope, event, options, model, undefined, customClass);
+                    renderContextMenu($scope, event, options, modelValue, undefined, customClass);
                 } else {
                     throw '"' + attrs.contextMenu + '" not an array';
                 }

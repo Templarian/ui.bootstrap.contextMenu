@@ -30,6 +30,13 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 </div>
 <div ng-bind="selected"></div>
 ```
+### Callback Parameters
+There are currently 5 parameters that are being passed to the callback:
+- $itemScope - The scope of the directive
+- event - The event associated with this directive (normally `contextmenu`)
+- modelValue - See "Model Attribute" below
+- text - The HTML value of the text. Normally this contains the &lt;a&gt; tag surrounding the text by default.
+- $li - The list item selected
 ### Controller
 
 ```js
@@ -40,11 +47,11 @@ $scope.items = [
 };
 
 $scope.menuOptions = [
-    ['Select', function ($itemScope) {
+    ['Select', function ($itemScope, $event, modelValue, text, $li) {
         $scope.selected = $itemScope.item.name;
     }],
     null, // Dividier
-    ['Remove', function ($itemScope) {
+    ['Remove', function ($itemScope, $event, modelValue, text, $li) {
         $scope.items.splice($itemScope.$index, 1);
     }]
 ];
@@ -58,11 +65,11 @@ The third optional index is a function used to enable/disable the item. If the f
 
 ```js
 $scope.menuOptions = [
-    [function ($itemScope, $event) {
+    [function ($itemScope, $event, modelValue, text, $li) {
         return $itemScope.item.name;
     }, function ($itemScope, $event) {
         // Action
-    }, function($itemScope, $event) {
+    }, function($itemScope, $event, modelValue, text, $li) {
         // Enable or Disable
         return true; // enabled = true, disabled = false
     }]
@@ -108,11 +115,11 @@ The `model` is evaluated as an expression using `$scope.$eval` and passed as the
 
 ```js
 $scope.menuOptions = [
-    [function ($itemScope, $event, model) {
+    [function ($itemScope, $event, modelValue) {
         return $itemScope.item.name;
-    }, function ($itemScope, $event, model) {
+    }, function ($itemScope, $event, modelValue) {
         // Action
-    }, function($itemScope, $event, model) {
+    }, function($itemScope, $event, modelValue) {
         // Enable or Disable
         return true; // enabled = true, disabled = false
     }]
