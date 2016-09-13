@@ -170,6 +170,16 @@ $scope.customHTMLOptions = [customItem, customItem2,
     }]
 ```
 
+## Allow Event Propagation
+Sometimes you'll want to catch the same event that's being used by this library and use it in another. To do this, you can use the property `allow-event-propagation`
+```
+<button class="btn btn-default"
+            context-menu="otherMenuOptions"
+            allow-event-propagation="true"
+            model="'Blue'">Right Click allow event propagation</button>
+```
+Note that if you set this to true, and don't catch it with something else the browser's context menu will be shown on top of this library's context menu.
+
 ## Nested Menus (v0.9.5+)
 
 Nested lists work by appending an array as the last index of any list of menu items.

@@ -307,8 +307,10 @@ angular.module('ui.bootstrap.contextMenu', [])
             openMenuEvent = attrs.contextMenuOn;
         }
         element.on(openMenuEvent, function (event) {
-            event.stopPropagation();
-            event.preventDefault();
+            if(!attrs.allowEventPropagation) {
+              event.stopPropagation();
+              event.preventDefault();
+            }
             
             // Don't show context menu if on touch device and element is draggable
             if(isTouchDevice() && element.attr('draggable') === 'true') {
