@@ -1,6 +1,6 @@
 {
     "name": "angular-bootstrap-contextmenu",
-    "version": "0.9.8",
+    "version": "0.9.9",
     "main": [ 
         "contextMenu.js"
     ],
