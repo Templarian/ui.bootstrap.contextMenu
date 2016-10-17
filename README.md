@@ -45,7 +45,7 @@ $scope.selected = 'None';
 $scope.items = [
     { name: 'John', otherProperty: 'Foo' },
     { name: 'Joe', otherProperty: 'Bar' }
-};
+];
 
 $scope.menuOptions = [
     ['Select', function ($itemScope, $event, modelValue, text, $li) {
@@ -62,7 +62,7 @@ $scope.menuOptions = [
 
 Every menu option has an array with 2-3 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
 
-The third optional index is a function used to enable/disable the item. If the functtion returns true, the item is enabled (default). If no function is provided, the item will be enabled by default.
+The third optional index is a function used to enable/disable the item. If the function returns true, the item is enabled (default). If no function is provided, the item will be enabled by default.
 
 ```js
 $scope.menuOptions = [
