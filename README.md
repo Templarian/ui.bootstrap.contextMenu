@@ -31,6 +31,7 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 <div ng-bind="selected"></div>
 ```
 ### Callback Parameters
+
 There are currently 5 parameters that are being passed to the callback:
 - $itemScope - The scope of the directive
 - event - The event associated with this directive (normally `contextmenu`)
@@ -142,7 +143,7 @@ body > .angular-bootstrap-contextmenu.dropdown {
 
 ## Custom HTML
 
-```
+```js
 // With a custom static string:
 var customHtml = '<div style="cursor: pointer; background-color: pink">' +
                  '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
@@ -165,19 +166,24 @@ var customItem2 = {
     }
 };
 
-$scope.customHTMLOptions = [customItem, customItem2,
+$scope.customHTMLOptions = [
+    customItem,
+    customItem2,
     ['Example 1', function ($itemScope, $event, value) {
         alert("Example 1");
     }]
+];
 ```
 
 ## Allow Event Propagation
+
 Sometimes you'll want to catch the same event that's being used by this library and use it in another. To do this, you can use the property `allow-event-propagation`
-```
+
+```html
 <button class="btn btn-default"
-            context-menu="otherMenuOptions"
-            allow-event-propagation="true"
-            model="'Blue'">Right Click allow event propagation</button>
+        context-menu="otherMenuOptions"
+        allow-event-propagation="true"
+        model="'Blue'">Right Click allow event propagation</button>
 ```
 Note that if you set this to true, and don't catch it with something else the browser's context menu will be shown on top of this library's context menu.
 
