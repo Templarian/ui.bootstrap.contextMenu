@@ -1,3 +1,5 @@
+(function($) {
+
 angular.module('ui.bootstrap.contextMenu', [])
 
 .service('CustomService', function () {
@@ -225,7 +227,6 @@ angular.module('ui.bootstrap.contextMenu', [])
     var renderContextMenu = function ($scope, event, options, modelValue, level, customClass) {
         /// <summary>Render context menu recursively.</summary>
         if (!level) { level = 0; }
-        if (!$) { var $ = angular.element; }
         $(event.currentTarget).addClass('context');
         var $ul = $('<ul>');
         $ul.addClass('dropdown-menu');
@@ -266,26 +267,38 @@ angular.module('ui.bootstrap.contextMenu', [])
             removeAllContextMenus(e);
         }
 
-        function removeOnClickEvent(e) {
-          if( !$(e.target).parents().hasClass("dropdown-menu") ) {
+        function removeOnOutsideClickEvent(e) {
+          
+          var $curr = $(e.target);
+          var shouldRemove = true;
+          
+          while($curr.length) {
+            if($curr.hasClass("dropdown-menu")) {
+              shouldRemove = false;
+              break;
+            } else {
+              $curr = $curr.parent();
+            }
+          }
+          if( shouldRemove ) {
             removeAllContextMenus(e);
           }
         }
 
 
         function removeAllContextMenus(e) {
-            $(document.body).unbind('mousedown.contextmenu');
-            $(document).unbind('scroll.contextmenu');
-            if ( $(event.currentTarget).hasClass('context') ) {
+            $(document.body).off('mousedown', removeOnOutsideClickEvent);
+            $(document).off('scroll', removeOnScrollEvent);
+            if ( !$(event.currentTarget).hasClass('context') ) {
                 $(event.currentTarget).removeClass('context');
                 removeContextMenus();
             }
         }
 
         if(level === 0) {
-          $(document.body).bind('mousedown.contextmenu', removeOnClickEvent);
+          $(document.body).on('mousedown', removeOnOutsideClickEvent);
           /// remove the menu when the scroll moves
-          $(document).bind('scroll.contextmenu', removeOnScrollEvent);
+          $(document).on('scroll', removeOnScrollEvent);
         }
 
         $scope.$on("$destroy", function () {
@@ -329,3 +342,5 @@ angular.module('ui.bootstrap.contextMenu', [])
         });
     };
 }]);
+
+})(window.angular.element);
