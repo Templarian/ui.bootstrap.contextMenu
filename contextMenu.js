@@ -289,10 +289,8 @@ angular.module('ui.bootstrap.contextMenu', [])
         function removeAllContextMenus(e) {
             $(document.body).off('mousedown', removeOnOutsideClickEvent);
             $(document).off('scroll', removeOnScrollEvent);
-            if ( !$(event.currentTarget).hasClass('context') ) {
-                $(event.currentTarget).removeClass('context');
-                removeContextMenus();
-            }
+            $(event.originalTarget).removeClass('context');
+            removeContextMenus();
         }
 
         if(level === 0) {
