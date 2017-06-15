@@ -14,50 +14,72 @@ angular.module('ui.bootstrap.contextMenu', [])
 })
 .directive('contextMenu', ["$parse", "$q", "CustomService", "$sce", function ($parse, $q, custom, $sce) {
 
-    var contextMenus = [];
-    var defaultItemText = "New Item";
+    var _contextMenus = [];
+    var DEFAULT_ITEM_TEXT = "New Item";
 
-    var removeContextMenus = function (level) {
-        /// <summary>Remove context menu.</summary>
-        while (contextMenus.length && (!level || contextMenus.length > level)) {
-            contextMenus.pop().remove();
-        }
-    };
+    var processTextItem = function (params) {
+        // Destructuring:
+        var $scope = params.$scope;
+        var item = params.item;
+        var text = params.text;
+        var event = params.event;
+        var modelValue = params.modelValue;
+        var $promises = params.$promises;
+        var nestedMenu = params.nestedMenu;
 
-
-    var processTextItem = function ($scope, item, text, event, modelValue, $promises, nestedMenu, $) {
-        "use strict";
+        var textParam = item[0];
 
         var $a = $('<a>');
         $a.css("padding-right", "8px");
         $a.attr({ tabindex: '-1', href: '#' });
 
-        if (typeof item[0] === 'string') {
-            text = item[0];
+        if (typeof textParam === 'string') {
+            text = textParam;
         }
-        else if (typeof item[0] === "function") {
-            text = item[0].call($scope, $scope, event, modelValue);
+        else if (typeof textParam === "function") {
+            text = textParam.call($scope, $scope, event, modelValue);
         } else if (typeof item.text !== "undefined") {
             text = item.text;
         }
 
         var $promise = $q.when(text);
         $promises.push($promise);
-        $promise.then(function (text) {
+        $promise.then(function (promisedText) {
             if (nestedMenu) {
                 $a.css("cursor", "default");
                 $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
             }
-            $a.append(text);
+            $a.append(promisedText);
         });
 
         return $a;
 
     };
 
-    var processItem = function ($scope, event, modelValue, item, $ul, $li, $promises, $q, $, level) {
-        /// <summary>Process individual item</summary>
-        "use strict";
+    /**
+     * Process each individual item
+     *
+     * Properties of params:
+     * - $scope
+     * - event
+     * - modelValue
+     * - level
+     * - item
+     * - $ul
+     * - $li
+     * - $promises
+     */
+    var processItem = function (params) {
+        // Destructuring:
+        var item = params.item;
+        var $ul = params.$ul;
+        var $li = params.$li;
+        var $scope = params.$scope;
+        var modelValue = params.modelValue;
+        var level = params.level;
+        var event = params.event;
+        var $promises = params.promises;
+
         // nestedMenu is either an Array or a Promise that will return that array.
         var nestedMenu = angular.isArray(item[1]) ||
             (item[1] && angular.isFunction(item[1].then)) ? item[1] : angular.isArray(item[2]) ||
@@ -68,38 +90,32 @@ angular.module('ui.bootstrap.contextMenu', [])
         // if first item in the item array is a function then invoke .call()
         // if first item is a string, then text should be the string.
 
-        var text = defaultItemText;
-        if (typeof item[0] === 'function' || typeof item[0] === 'string' || typeof item.text !== "undefined") {
-            text = processTextItem($scope, item, text, event, modelValue, $promises, nestedMenu, $);
-        }
-        else if (typeof item.html === 'function') {
+        var text = DEFAULT_ITEM_TEXT;
+        var currItemParam = angular.extend({}, params);
+        currItemParam.text = text;
+        currItemParam.nestedMenu = nestedMenu;
+        currItemParam.enabled = isOptionEnabled(currItemParam);
+
+        // START Processing text
+        var textParam = item[0];
+        if (typeof textParam === 'function' || typeof textParam === 'string' || typeof item.text !== "undefined") {
+            text = processTextItem(currItemParam);
+        } else if (typeof item.html === 'function') {
             // leave styling open to dev
             text = item.html($scope);
-        }
-        else if (typeof item.html !== "undefined") {
+        } else if (typeof item.html !== "undefined") {
             // leave styling open to dev
             text = item.html;
         }
 
+        // Need to re-assign after all the processing above
+        currItemParam.text = text;
         $li.append(text);
 
+        // END Processing text
 
+        registerEnabledEvents(currItemParam);
 
-
-        // if item is object, and has enabled prop invoke the prop
-        // els if fallback to item[2]
-
-        var isEnabled = function () {
-            if (typeof item.enabled !== "undefined") {
-                return item.enabled.call($scope, $scope, event, modelValue, text);
-            } else if (typeof item[2] === "function") {
-                return item[2].call($scope, $scope, event, modelValue, text);
-            } else {
-                return true;
-            }
-        };
-
-        registerEnabledEvents($scope, isEnabled(), item, $ul, $li, nestedMenu, modelValue, text, event, $, level);
     };
 
     var handlePromises = function ($ul, level, event, $promises) {
@@ -157,8 +173,21 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-    var registerEnabledEvents = function ($scope, enabled, item, $ul, $li, nestedMenu, modelValue, text, event, $, level) {
+    var registerEnabledEvents = function (params) {
         /// <summary>If item is enabled, register various mouse events.</summary>
+
+        // Destructuring:
+        var item = params.item;
+        var $ul = params.$ul;
+        var $li = params.$li;
+        var $scope = params.$scope;
+        var modelValue = params.modelValue;
+        var level = params.level;
+        var event = params.event;
+        var text = params.text;
+        var nestedMenu = params.nestedMenu;
+        var enabled = params.enabled;
+
         if (enabled) {
             var openNestedMenu = function ($event) {
                 removeContextMenus(level + 1);
@@ -177,10 +206,17 @@ angular.module('ui.bootstrap.contextMenu', [])
 
                 /*
                  * At this point, nestedMenu can only either be an Array or a promise.
-                 * Regardless, passing them to when makes the implementation singular.
+                 * Regardless, passing them to `when` makes the implementation singular.
                  */
                 $q.when(nestedMenu).then(function(promisedNestedMenu) {
-                    renderContextMenu($scope, ev, promisedNestedMenu, modelValue, level + 1);
+                    var nestedParam = {
+                      "$scope" : $scope,
+                      "event" : ev,
+                      "options" : promisedNestedMenu,
+                      "modelValue" : modelValue,
+                      "level" : level + 1
+                    };
+                    renderContextMenu(nestedParam);
                 });
             };
 
@@ -223,21 +259,32 @@ angular.module('ui.bootstrap.contextMenu', [])
 
     };
 
-
-    var renderContextMenu = function ($scope, event, options, modelValue, level, customClass) {
+    /**
+     * Responsible for the actual rendering of the context menu.
+     *
+     * The parameters in params are:
+     * - $scope = the scope of this context menu
+     * - event = the event that triggered this context menu
+     * - options = the options for this context menu
+     * - modelValue = the value of the model attached to this context menu
+     * - level = the current context menu level (defauts to 0)
+     * - customClass = the custom class to be used for the context menu
+     */
+    function renderContextMenu (params) {
         /// <summary>Render context menu recursively.</summary>
-        if (!level) { level = 0; }
+
+        // Destructuring:
+        var $scope = params.$scope;
+        var event = params.event;
+        var options = params.options;
+        var modelValue = params.modelValue;
+        var level = params.level;
+        var customClass = params.customClass;
+
         $(event.currentTarget).addClass('context');
-        var $ul = $('<ul>');
-        $ul.addClass('dropdown-menu');
-        $ul.attr({ 'role': 'menu' });
-        $ul.css({
-            display: 'block',
-            position: 'absolute',
-            left: event.pageX + 'px',
-            top: event.pageY + 'px',
-            "z-index": 10000
-        });
+
+        // Initialize the container. This will be passed around
+        var $ul = initContextMenuContainer(params);
 
         var $promises = [];
 
@@ -249,7 +296,12 @@ angular.module('ui.bootstrap.contextMenu', [])
             } else if (typeof item[0] === "object") {
                 custom.initialize($li, item);
             } else {
-                processItem($scope, event, modelValue, item, $ul, $li, $promises, $q, $, level);
+                var itemParams = angular.extend({}, params);
+                itemParams.item = item;
+                itemParams.$ul = $ul;
+                itemParams.$li = $li;
+                itemParams.$promises = $promises;
+                processItem(itemParams);
             }
             $ul.append($li);
         });
@@ -263,37 +315,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         handlePromises($ul, level, event, $promises);
 
-        function removeOnScrollEvent(e) {
-            removeAllContextMenus(e);
-        }
-
-        function removeOnOutsideClickEvent(e) {
-          
-          var $curr = $(e.target);
-          var shouldRemove = true;
-          
-          while($curr.length) {
-            if($curr.hasClass("dropdown-menu")) {
-              shouldRemove = false;
-              break;
-            } else {
-              $curr = $curr.parent();
-            }
-          }
-          if( shouldRemove ) {
-            removeAllContextMenus(e);
-          }
-        }
-
-
-        function removeAllContextMenus(e) {
-            $(document.body).off('mousedown', removeOnOutsideClickEvent);
-            $(document).off('scroll', removeOnScrollEvent);
-            $(event.originalTarget).removeClass('context');
-            removeContextMenus();
-        }
-
-        if(level === 0) {
+        if(params.level === 0) {
           $(document.body).on('mousedown', removeOnOutsideClickEvent);
           /// remove the menu when the scroll moves
           $(document).on('scroll', removeOnScrollEvent);
@@ -303,11 +325,88 @@ angular.module('ui.bootstrap.contextMenu', [])
             removeContextMenus();
         });
 
-        contextMenus.push($ul);
+        _contextMenus.push($ul);
+
+        function removeOnScrollEvent(e) {
+            removeAllContextMenus(e);
+        }
+
+        function removeOnOutsideClickEvent(e) {
+
+          var $curr = $(e.target);
+          var shouldRemove = true;
+
+          while($curr.length) {
+            if($curr.hasClass("dropdown-menu")) {
+              shouldRemove = false;
+              break;
+            } else {
+              $curr = $curr.parent();
+            }
+          }
+          if ( shouldRemove ) {
+            removeAllContextMenus(e);
+          }
+        }
+
+        function removeAllContextMenus(e) {
+            $(document.body).off('mousedown', removeOnOutsideClickEvent);
+            $(document).off('scroll', removeOnScrollEvent);
+            $(event.originalTarget).removeClass('context');
+            removeContextMenus();
+        }
+    };
+
+    /**
+     * Creates the container of the context menu (a <ul> element),
+     * applies the appropriate styles and then returns that container
+     *
+     * @return a <ul> jqLite/jQuery element
+     */
+    function initContextMenuContainer(params) {
+      var $ul = $('<ul>');
+      $ul.addClass('dropdown-menu');
+      $ul.attr({ 'role': 'menu' });
+      $ul.css({
+          display: 'block',
+          position: 'absolute',
+          left: params.event.pageX + 'px',
+          top: params.event.pageY + 'px',
+          "z-index": 10000
+      });
+
+      return $ul;
+    }
+
+    // if item is object, and has enabled prop invoke the prop
+    // else if fallback to item[2]
+    function isOptionEnabled (params) {
+        var item = params.item;
+        var $scope = params.$scope;
+        var event = params.event;
+        var modelValue = params.modelValue;
+        var text = params.text;
+
+        if (typeof item.enabled !== "undefined") {
+            return item.enabled.call($scope, $scope, event, modelValue, text);
+        } else if (typeof item[2] === "function") {
+            return item[2].call($scope, $scope, event, modelValue, text);
+        } else {
+            return true;
+        }
     };
 
     function isTouchDevice() {
       return 'ontouchstart' in window  || navigator.maxTouchPoints; // works on most browsers | works on IE10/11 and Surface
+    }
+
+    /**
+     *
+     */
+    function removeContextMenus (level) {
+        while (_contextMenus.length && (!level || _contextMenus.length > level)) {
+            _contextMenus.pop().remove();
+        }
     }
 
     return function ($scope, element, attrs) {
@@ -330,9 +429,19 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var options = $scope.$eval(attrs.contextMenu);
                 var customClass = attrs.contextMenuClass;
                 var modelValue = $scope.$eval(attrs.model);
+
+                var params = {
+                  "$scope" : $scope,
+                  "event" : event,
+                  "options" : options,
+                  "modelValue" : modelValue,
+                  "level" : 0,
+                  "customClass" : customClass
+                };
+
                 if (options instanceof Array) {
                     if (options.length === 0) { return; }
-                    renderContextMenu($scope, event, options, modelValue, undefined, customClass);
+                    renderContextMenu(params);
                 } else {
                     throw '"' + attrs.contextMenu + '" not an array';
                 }
