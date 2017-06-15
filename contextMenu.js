@@ -15,45 +15,61 @@ angular.module('ui.bootstrap.contextMenu', [])
 .directive('contextMenu', ["$parse", "$q", "CustomService", "$sce", function ($parse, $q, custom, $sce) {
 
     var _contextMenus = [];
+    // Contains the element that was clicked to show the context menu
+    var _clickedElement = null;
     var DEFAULT_ITEM_TEXT = "New Item";
 
-    var processTextItem = function (params) {
+    function createAndAddOptionText(params) {
         // Destructuring:
         var $scope = params.$scope;
         var item = params.item;
-        var text = params.text;
         var event = params.event;
         var modelValue = params.modelValue;
         var $promises = params.$promises;
         var nestedMenu = params.nestedMenu;
+        var $li = params.$li;
 
-        var textParam = item[0];
+        var optionText = null;
 
-        var $a = $('<a>');
-        $a.css("padding-right", "8px");
-        $a.attr({ tabindex: '-1', href: '#' });
+        if (item.html) {
+          if (angular.isFunction(item.html)) {
+            // runs the function that expects a jQuery/jqLite element
+            optionText = item.html($scope);
+          } else {
+            // Assumes that the developer already placed a valid jQuery/jqLite element
+            optionText = item.html;
+          }
+        } else {
 
-        if (typeof textParam === 'string') {
-            text = textParam;
+          var $a = $('<a>');
+          $a.css("padding-right", "8px");
+          $a.attr({ tabindex: '-1', href: '#' });
+
+          var textParam = item[0];
+          var text = DEFAULT_ITEM_TEXT;
+
+          if (typeof textParam === 'string') {
+              text = textParam;
+          } else if (typeof textParam === "function") {
+              text = textParam.call($scope, $scope, event, modelValue);
+          } else if (typeof item.text !== "undefined") {
+              text = item.text;
+          }
+
+          var $promise = $q.when(text);
+          $promises.push($promise);
+          $promise.then(function (pText) {
+              if (nestedMenu) {
+                  $a.css("cursor", "default");
+                  $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
+              }
+              $a.append(pText);
+          });
+
+          optionText = $a;
         }
-        else if (typeof textParam === "function") {
-            text = textParam.call($scope, $scope, event, modelValue);
-        } else if (typeof item.text !== "undefined") {
-            text = item.text;
-        }
 
-        var $promise = $q.when(text);
-        $promises.push($promise);
-        $promise.then(function (promisedText) {
-            if (nestedMenu) {
-                $a.css("cursor", "default");
-                $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
-            }
-            $a.append(promisedText);
-        });
-
-        return $a;
-
+        $li.append(optionText);
     };
 
     /**
@@ -69,18 +85,12 @@ angular.module('ui.bootstrap.contextMenu', [])
      * - $li
      * - $promises
      */
-    var processItem = function (params) {
+    function processItem(params) {
         // Destructuring:
         var item = params.item;
-        var $ul = params.$ul;
-        var $li = params.$li;
-        var $scope = params.$scope;
-        var modelValue = params.modelValue;
-        var level = params.level;
-        var event = params.event;
-        var $promises = params.promises;
 
         // nestedMenu is either an Array or a Promise that will return that array.
+        // NOTE: This might be changed soon as it's a hangover from an old implementation
         var nestedMenu = angular.isArray(item[1]) ||
             (item[1] && angular.isFunction(item[1].then)) ? item[1] : angular.isArray(item[2]) ||
             (item[2] && angular.isFunction(item[2].then)) ? item[2] : angular.isArray(item[3]) ||
@@ -92,90 +102,19 @@ angular.module('ui.bootstrap.contextMenu', [])
 
         var text = DEFAULT_ITEM_TEXT;
         var currItemParam = angular.extend({}, params);
-        currItemParam.text = text;
         currItemParam.nestedMenu = nestedMenu;
         currItemParam.enabled = isOptionEnabled(currItemParam);
+        currItemParam.text = createAndAddOptionText(currItemParam);
 
-        // START Processing text
-        var textParam = item[0];
-        if (typeof textParam === 'function' || typeof textParam === 'string' || typeof item.text !== "undefined") {
-            text = processTextItem(currItemParam);
-        } else if (typeof item.html === 'function') {
-            // leave styling open to dev
-            text = item.html($scope);
-        } else if (typeof item.html !== "undefined") {
-            // leave styling open to dev
-            text = item.html;
-        }
-
-        // Need to re-assign after all the processing above
-        currItemParam.text = text;
-        $li.append(text);
-
-        // END Processing text
-
-        registerEnabledEvents(currItemParam);
+        registerCurrentItemEvents(currItemParam);
 
     };
 
-    var handlePromises = function ($ul, level, event, $promises) {
-        /// <summary>
-        /// calculate if drop down menu would go out of screen at left or bottom
-        /// calculation need to be done after element has been added (and all texts are set; thus thepromises)
-        /// to the DOM the get the actual height
-        /// </summary>
-        "use strict";
-        $q.all($promises).then(function () {
-            var topCoordinate  = event.pageY;
-            var menuHeight = angular.element($ul[0]).prop('offsetHeight');
-            var winHeight = window.scrollY + event.view.innerHeight;
-            /// the 20 pixels in second condition are considering the browser status bar that sometimes overrides the element
-            if (topCoordinate > menuHeight && winHeight - topCoordinate < menuHeight + 20) {
-                topCoordinate = event.pageY - menuHeight;
-                /// If the element is a nested menu, adds the height of the parent li to the topCoordinate to align with the parent
-                if(level && level > 0) {
-                  topCoordinate += event.event.currentTarget.offsetHeight;
-                }
-            } else if(winHeight <= menuHeight) {
-                // If it really can't fit, reset the height of the menu to one that will fit
-                angular.element($ul[0]).css({"height": winHeight - 5, "overflow-y": "scroll"});
-                // ...then set the topCoordinate height to 0 so the menu starts from the top
-                topCoordinate = 0;
-            } else if(winHeight - topCoordinate < menuHeight) {
-                var reduceThresholdY = 5;
-                if(topCoordinate < reduceThresholdY) {
-                    reduceThresholdY = topCoordinate;
-                }
-                topCoordinate = winHeight - menuHeight - reduceThresholdY;
-            }
-
-            var leftCoordinate = event.pageX;
-            var menuWidth = angular.element($ul[0]).prop('offsetWidth');
-            var winWidth = event.view.innerWidth;
-            var rightPadding = 5;
-            if (leftCoordinate > menuWidth && winWidth - leftCoordinate - rightPadding < menuWidth) {
-                leftCoordinate = winWidth - menuWidth - rightPadding;
-            } else if(winWidth - leftCoordinate < menuWidth) {
-                var reduceThresholdX = 5;
-                if(leftCoordinate < reduceThresholdX + rightPadding) {
-                    reduceThresholdX = leftCoordinate + rightPadding;
-                }
-                leftCoordinate = winWidth - menuWidth - reduceThresholdX - rightPadding;
-            }
-
-            $ul.css({
-                display: 'block',
-                position: 'absolute',
-                left: leftCoordinate + 'px',
-                top: topCoordinate + 'px'
-            });
-        });
-
-    };
-
-    var registerEnabledEvents = function (params) {
-        /// <summary>If item is enabled, register various mouse events.</summary>
-
+    /*
+     * Registers the appropriate mouse events for options if the item is enabled.
+     * Otherwise, it ensures that clicks to the item do not propagate.
+     */
+    function registerCurrentItemEvents (params) {
         // Destructuring:
         var item = params.item;
         var $ul = params.$ul;
@@ -228,7 +167,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                           openNestedMenu($event);
                       } else {
                           $(event.currentTarget).removeClass('context');
-                          removeContextMenus();
+                          removeAllContextMenus();
 
                           if (angular.isFunction(item[1])) {
                               item[1].call($scope, $scope, event, modelValue, text, $li);
@@ -244,7 +183,6 @@ angular.module('ui.bootstrap.contextMenu', [])
                 $scope.$apply(function () {
                     if (nestedMenu) {
                         openNestedMenu($event);
-                    /// Implementation made by dashawk
                     } else {
                         removeContextMenus(level + 1);
                     }
@@ -256,7 +194,6 @@ angular.module('ui.bootstrap.contextMenu', [])
             });
             $li.addClass('disabled');
         }
-
     };
 
     /**
@@ -281,15 +218,21 @@ angular.module('ui.bootstrap.contextMenu', [])
         var level = params.level;
         var customClass = params.customClass;
 
-        $(event.currentTarget).addClass('context');
-
         // Initialize the container. This will be passed around
         var $ul = initContextMenuContainer(params);
+        params.$ul = $ul;
 
+        // Register this level of the context menu
+        _contextMenus.push($ul);
+
+        /*
+         * This object will contain any promises that we have
+         * to wait for before trying to adjust the context menu.
+         */
         var $promises = [];
+        params.$promises = $promises;
 
         angular.forEach(options, function (item) {
-
             var $li = $('<li>');
             if (item === null) {
                 $li.addClass('divider');
@@ -298,63 +241,76 @@ angular.module('ui.bootstrap.contextMenu', [])
             } else {
                 var itemParams = angular.extend({}, params);
                 itemParams.item = item;
-                itemParams.$ul = $ul;
                 itemParams.$li = $li;
-                itemParams.$promises = $promises;
                 processItem(itemParams);
             }
             $ul.append($li);
         });
 
-        var height = Math.max(
-            document.body.scrollHeight, document.documentElement.scrollHeight,
-            document.body.offsetHeight, document.documentElement.offsetHeight,
-            document.body.clientHeight, document.documentElement.clientHeight
-        );
         $(document).find('body').append($ul);
 
-        handlePromises($ul, level, event, $promises);
+        doAfterAllPromises(params);
+    };
 
-        if(params.level === 0) {
-          $(document.body).on('mousedown', removeOnOutsideClickEvent);
-          /// remove the menu when the scroll moves
-          $(document).on('scroll', removeOnScrollEvent);
-        }
+    /**
+     * calculate if drop down menu would go out of screen at left or bottom
+     * calculation need to be done after element has been added (and all texts are set; thus the promises)
+     * to the DOM the get the actual height
+     */
+    function doAfterAllPromises (params) {
 
-        $scope.$on("$destroy", function () {
-            removeContextMenus();
+        // Desctructuring:
+        var $ul = params.$ul;
+        var $promises = params.$promises;
+        var level = params.level;
+        var event = params.event;
+
+        $q.all($promises).then(function () {
+            var topCoordinate  = event.pageY;
+            var menuHeight = angular.element($ul[0]).prop('offsetHeight');
+            var winHeight = window.scrollY + event.view.innerHeight;
+            /// the 20 pixels in second condition are considering the browser status bar that sometimes overrides the element
+            if (topCoordinate > menuHeight && winHeight - topCoordinate < menuHeight + 20) {
+                topCoordinate = event.pageY - menuHeight;
+                /// If the element is a nested menu, adds the height of the parent li to the topCoordinate to align with the parent
+                if(level && level > 0) {
+                  topCoordinate += event.event.currentTarget.offsetHeight;
+                }
+            } else if(winHeight <= menuHeight) {
+                // If it really can't fit, reset the height of the menu to one that will fit
+                angular.element($ul[0]).css({"height": winHeight - 5, "overflow-y": "scroll"});
+                // ...then set the topCoordinate height to 0 so the menu starts from the top
+                topCoordinate = 0;
+            } else if(winHeight - topCoordinate < menuHeight) {
+                var reduceThresholdY = 5;
+                if(topCoordinate < reduceThresholdY) {
+                    reduceThresholdY = topCoordinate;
+                }
+                topCoordinate = winHeight - menuHeight - reduceThresholdY;
+            }
+
+            var leftCoordinate = event.pageX;
+            var menuWidth = angular.element($ul[0]).prop('offsetWidth');
+            var winWidth = event.view.innerWidth;
+            var rightPadding = 5;
+            if (leftCoordinate > menuWidth && winWidth - leftCoordinate - rightPadding < menuWidth) {
+                leftCoordinate = winWidth - menuWidth - rightPadding;
+            } else if(winWidth - leftCoordinate < menuWidth) {
+                var reduceThresholdX = 5;
+                if(leftCoordinate < reduceThresholdX + rightPadding) {
+                    reduceThresholdX = leftCoordinate + rightPadding;
+                }
+                leftCoordinate = winWidth - menuWidth - reduceThresholdX - rightPadding;
+            }
+
+            $ul.css({
+                display: 'block',
+                position: 'absolute',
+                left: leftCoordinate + 'px',
+                top: topCoordinate + 'px'
+            });
         });
 
-        _contextMenus.push($ul);
-
-        function removeOnScrollEvent(e) {
-            removeAllContextMenus(e);
-        }
-
-        function removeOnOutsideClickEvent(e) {
-
-          var $curr = $(e.target);
-          var shouldRemove = true;
-
-          while($curr.length) {
-            if($curr.hasClass("dropdown-menu")) {
-              shouldRemove = false;
-              break;
-            } else {
-              $curr = $curr.parent();
-            }
-          }
-          if ( shouldRemove ) {
-            removeAllContextMenus(e);
-          }
-        }
-
-        function removeAllContextMenus(e) {
-            $(document.body).off('mousedown', removeOnOutsideClickEvent);
-            $(document).off('scroll', removeOnScrollEvent);
-            $(event.originalTarget).removeClass('context');
-            removeContextMenus();
-        }
     };
 
     /**
@@ -401,12 +357,43 @@ angular.module('ui.bootstrap.contextMenu', [])
     }
 
     /**
-     *
+     * Removes the context menus with level greater than or equal
+     * to the value passed. If undefined, null or 0, all context menus
+     * are removed.
      */
     function removeContextMenus (level) {
         while (_contextMenus.length && (!level || _contextMenus.length > level)) {
             _contextMenus.pop().remove();
         }
+    }
+
+    function removeOnScrollEvent(e) {
+        removeAllContextMenus(e);
+    }
+
+    function removeOnOutsideClickEvent(e) {
+
+      var $curr = $(e.target);
+      var shouldRemove = true;
+
+      while($curr.length) {
+        if($curr.hasClass("dropdown-menu")) {
+          shouldRemove = false;
+          break;
+        } else {
+          $curr = $curr.parent();
+        }
+      }
+      if (shouldRemove) {
+        removeAllContextMenus(e);
+      }
+    }
+
+    function removeAllContextMenus(e) {
+        $(document.body).off('mousedown', removeOnOutsideClickEvent);
+        $(document).off('scroll', removeOnScrollEvent);
+        $(_clickedElement).removeClass('context');
+        removeContextMenus();
     }
 
     return function ($scope, element, attrs) {
@@ -424,6 +411,14 @@ angular.module('ui.bootstrap.contextMenu', [])
             if(isTouchDevice() && element.attr('draggable') === 'true') {
               return false;
             }
+
+            // Remove if the user clicks outside
+            $(document.body).on('mousedown', removeOnOutsideClickEvent);
+            // Remove the menu when the scroll moves
+            $(document).on('scroll', removeOnScrollEvent);
+
+            _clickedElement = event.currentTarget;
+            $(_clickedElement).addClass('context');
 
             $scope.$apply(function () {
                 var options = $scope.$eval(attrs.contextMenu);
@@ -445,6 +440,11 @@ angular.module('ui.bootstrap.contextMenu', [])
                 } else {
                     throw '"' + attrs.contextMenu + '" not an array';
                 }
+            });
+
+            // Remove all context menus if the scope is destroyed
+            $scope.$on("$destroy", function () {
+                removeAllContextMenus();
             });
         });
     };
