@@ -10,7 +10,7 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
         };
 
         $scope.items = [
-            { name: 'Small Health Potion', cost: 4 },
+            { name: 'Small Health Potion', cost: 4},
             { name: 'Small Mana Potion', cost: 5 },
             { name: 'Iron Short Sword', cost: 12 }
         ];

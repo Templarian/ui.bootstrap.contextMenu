@@ -28,6 +28,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         var $promises = params.$promises;
         var nestedMenu = params.nestedMenu;
         var $li = params.$li;
+        var leftOriented = String(params.orientation).toLowerCase() === 'left';
 
         var optionText = null;
 
@@ -42,7 +43,17 @@ angular.module('ui.bootstrap.contextMenu', [])
         } else {
 
           var $a = $('<a>');
-          $a.css("padding-right", "8px");
+          var $anchorStyle = {};
+
+          if (leftOriented) {
+              $anchorStyle.textAlign = 'right';
+              $anchorStyle.paddingLeft = "8px";
+            } else {
+              $anchorStyle.textAlign = 'left';
+              $anchorStyle.paddingRight = "8px";
+            }
+
+          $a.css($anchorStyle);
           $a.attr({ tabindex: '-1', href: '#' });
 
           var textParam = item[0];
@@ -60,8 +71,24 @@ angular.module('ui.bootstrap.contextMenu', [])
           $promises.push($promise);
           $promise.then(function (pText) {
               if (nestedMenu) {
+                  var $arrow;
+                  var $boldStyle = {
+                      fontFamily: 'monospace',
+                      fontWeight: 'bold'
+                  };
+
+                  if (leftOriented) {
+                      $arrow = '&lt;';
+                      $boldStyle.float = 'left';
+                  } else {
+                      $arrow = '&gt;';
+                      $boldStyle.float = 'right';
+                  }
+
+                  var $bold = $('<strong style="font-family:monospace;font-weight:bold;float:right;">' + $arrow + '</strong>');
+                  $bold.css($boldStyle);
                   $a.css("cursor", "default");
-                  $a.append($('<strong style="font-family:monospace;font-weight:bold;float:right;">&gt;</strong>'));
+                  $a.append($bold);
               }
               $a.append(pText);
           });
@@ -118,6 +145,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         var text = params.text;
         var nestedMenu = params.nestedMenu;
         var enabled = params.enabled;
+        var orientation = String(params.orientation).toLowerCase();
 
         if (enabled) {
             var openNestedMenu = function ($event) {
@@ -129,7 +157,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                  */
                 /// adding the original event in the object to use the attributes of the mouse over event in the promises
                 var ev = {
-                    pageX: event.pageX + $ul[0].offsetWidth - 1,
+                    pageX: orientation === 'left' ? event.pageX - $ul[0].offsetWidth + 1 : event.pageX + $ul[0].offsetWidth - 1,
                     pageY: $ul[0].offsetTop + $li[0].offsetTop - 3,
                     view: event.view || window,
                     event: $event
@@ -145,7 +173,8 @@ angular.module('ui.bootstrap.contextMenu', [])
                       "event" : ev,
                       "options" : promisedNestedMenu,
                       "modelValue" : modelValue,
-                      "level" : level + 1
+                      "level" : level + 1,
+                      "orientation": orientation
                     };
                     renderContextMenu(nestedParam);
                 });
@@ -289,6 +318,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         var $promises = params.$promises;
         var level = params.level;
         var event = params.event;
+        var leftOriented = String(params.orientation).toLowerCase() === 'left';
 
         $q.all($promises).then(function () {
             var topCoordinate  = event.pageY;
@@ -317,15 +347,30 @@ angular.module('ui.bootstrap.contextMenu', [])
             var leftCoordinate = event.pageX;
             var menuWidth = angular.element($ul[0]).prop('offsetWidth');
             var winWidth = event.view.innerWidth;
-            var rightPadding = 5;
-            if (leftCoordinate > menuWidth && winWidth - leftCoordinate - rightPadding < menuWidth) {
-                leftCoordinate = winWidth - menuWidth - rightPadding;
-            } else if(winWidth - leftCoordinate < menuWidth) {
-                var reduceThresholdX = 5;
-                if(leftCoordinate < reduceThresholdX + rightPadding) {
-                    reduceThresholdX = leftCoordinate + rightPadding;
+            var padding = 5;
+
+            if (leftOriented) {
+                if (winWidth - leftCoordinate > menuWidth && leftCoordinate < menuWidth + padding) {
+                    leftCoordinate = padding;
+                } else if (leftCoordinate < menuWidth) {
+                    var reduceThresholdX = 5;
+                    if (winWidth - leftCoordinate < reduceThresholdX + padding) {
+                        reduceThresholdX = winWidth - leftCoordinate + padding;
+                    }
+                    leftCoordinate = menuWidth + reduceThresholdX + padding;
+                } else {
+                    leftCoordinate = leftCoordinate - menuWidth;
                 }
-                leftCoordinate = winWidth - menuWidth - reduceThresholdX - rightPadding;
+            } else {
+                if (leftCoordinate > menuWidth && winWidth - leftCoordinate - padding < menuWidth) {
+                    leftCoordinate = winWidth - menuWidth - padding;
+                } else if(winWidth - leftCoordinate < menuWidth) {
+                    var reduceThresholdX = 5;
+                    if(leftCoordinate < reduceThresholdX + padding) {
+                        reduceThresholdX = leftCoordinate + padding;
+                    }
+                    leftCoordinate = winWidth - menuWidth - reduceThresholdX - padding;
+                }
             }
 
             $ul.css({
@@ -454,6 +499,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var options = $scope.$eval(attrs.contextMenu);
                 var customClass = attrs.contextMenuClass;
                 var modelValue = $scope.$eval(attrs.model);
+                var orientation = attrs.contextMenuOrientation;
 
                 var params = {
                   "$scope" : $scope,
@@ -461,7 +507,8 @@ angular.module('ui.bootstrap.contextMenu', [])
                   "options" : options,
                   "modelValue" : modelValue,
                   "level" : 0,
-                  "customClass" : customClass
+                  "customClass" : customClass,
+                  "orientation": orientation
                 };
 
                 if (options instanceof Array) {
