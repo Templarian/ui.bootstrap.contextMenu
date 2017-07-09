@@ -320,6 +320,9 @@ angular.module('ui.bootstrap.contextMenu', [])
      * @return a <ul> jqLite/jQuery element
      */
     function initContextMenuContainer(params) {
+      // Destructuring
+      var customClass = params.customClass;
+
       var $ul = $('<ul>');
       $ul.addClass('dropdown-menu');
       $ul.attr({ 'role': 'menu' });
@@ -330,6 +333,8 @@ angular.module('ui.bootstrap.contextMenu', [])
           top: params.event.pageY + 'px',
           "z-index": 10000
       });
+
+      if(customClass) { $ul.addClass(customClass); }
 
       return $ul;
     }
