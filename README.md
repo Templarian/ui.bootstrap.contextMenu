@@ -1,4 +1,4 @@
-#contextMenu
+# contextMenu
 
 AngularJS UI Bootstrap Module for adding context menus to elements. [Demo](http://codepen.io/templarian/pen/VLKZLB)
 
@@ -61,6 +61,14 @@ $scope.menuOptions = [
 
 ## Menu Options
 
+### New implementation
+Every menu option is represented by an Object containing the following properties:
+- text - [Function/String] A function that returns the string or the actual string itself
+- click - [Function] The function to be called on click of the option
+- enabled - [Function/Boolean] A function returning whether the option is enabled or not, or a boolean
+- children - [Array] An array of Options that will appear as the submenu of the current option
+
+### Legacy implementation (still supported, but will not be updated any longer)
 Every menu option has an array with 2-3 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
 
 The third optional index is a function used to enable/disable the item. If the function returns true, the item is enabled (default). If no function is provided, the item will be enabled by default.

@@ -33,7 +33,31 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
                 ['Alert Player Gold', function ($itemScope) {
                     alert($scope.player.gold);
                 }]
-            ]]
+            ]],
+            null,
+            // NEW OBJECT BASED IMPLEMENTATION:
+            {
+              text: 'A Few New Objects',
+              click: function () {
+                alert('A new implementation based on objects');
+              }
+            },
+            {
+              text: 'Object-based with Submenu',
+              click: function() {
+                alert('I clicked the parent item');
+              },
+              children: [
+                { text: 'Object-based child 1', click: function() { alert('object child 1');} },
+                { text: 'Object-based child 2', click: function() { alert('object child 2');} }
+              ]
+            },
+            {
+              text: 'Disabled object-based option',
+              enabled: function () {
+                return false;
+              }
+            }
         ];
 
         $scope.otherMenuOptions = [

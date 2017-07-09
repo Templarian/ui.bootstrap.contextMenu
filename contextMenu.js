@@ -86,15 +86,7 @@ angular.module('ui.bootstrap.contextMenu', [])
      * - $promises
      */
     function processItem(params) {
-        // Destructuring:
-        var item = params.item;
-
-        // nestedMenu is either an Array or a Promise that will return that array.
-        // NOTE: This might be changed soon as it's a hangover from an old implementation
-        var nestedMenu = angular.isArray(item[1]) ||
-            (item[1] && angular.isFunction(item[1].then)) ? item[1] : angular.isArray(item[2]) ||
-            (item[2] && angular.isFunction(item[2].then)) ? item[2] : angular.isArray(item[3]) ||
-            (item[3] && angular.isFunction(item[3].then)) ? item[3] : null;
+        var nestedMenu = extractNestedMenu(params);
 
         // if html property is not defined, fallback to text, otherwise use default text
         // if first item in the item array is a function then invoke .call()
@@ -163,18 +155,18 @@ angular.module('ui.bootstrap.contextMenu', [])
                 if($event.which == 1) {
                   $event.preventDefault();
                   $scope.$apply(function () {
-                      if (nestedMenu) {
-                          openNestedMenu($event);
-                      } else {
-                          $(event.currentTarget).removeClass('context');
-                          removeAllContextMenus();
+                    $(event.currentTarget).removeClass('context');
+                    removeAllContextMenus();
 
-                          if (angular.isFunction(item[1])) {
-                              item[1].call($scope, $scope, event, modelValue, text, $li);
-                          } else {
-                              item.click.call($scope, $scope, event, modelValue, text, $li);
-                          }
-                      }
+                    var clickFunction = angular.isFunction(item.click)
+                      ? item.click
+                      : (angular.isFunction(item[1])
+                          ? item[1]
+                          : null);
+
+                    if (clickFunction) {
+                      clickFunction.call($scope, $scope, event, modelValue, text, $li);
+                    }
                   });
                 }
             });
@@ -195,6 +187,39 @@ angular.module('ui.bootstrap.contextMenu', [])
             $li.addClass('disabled');
         }
     };
+
+    /**
+     * @param params - an object containing the `item` parameter
+     * @returns an Array or a Promise containing the children,
+     *          or null if the option has no submenu
+     */
+    function extractNestedMenu(params) {
+      // Destructuring:
+      var item = params.item;
+
+      // New implementation:
+      if (item.children) {
+        if (angular.isFunction(item.children)) {
+          // Expects a function that returns a Promise or an Array
+          return item.children();
+        } else if (angular.isFunction(item.children.then) || angular.isArray(item.children)) {
+          // Returns the promise
+          // OR, returns the actual array
+          return item.children;
+        }
+
+        return null;
+
+      } else {
+        // nestedMenu is either an Array or a Promise that will return that array.
+        // NOTE: This might be changed soon as it's a hangover from an old implementation
+
+        return angular.isArray(item[1]) ||
+            (item[1] && angular.isFunction(item[1].then)) ? item[1] : angular.isArray(item[2]) ||
+            (item[2] && angular.isFunction(item[2].then)) ? item[2] : angular.isArray(item[3]) ||
+            (item[3] && angular.isFunction(item[3].then)) ? item[3] : null;
+      }
+    }
 
     /**
      * Responsible for the actual rendering of the context menu.
