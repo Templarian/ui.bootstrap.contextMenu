@@ -160,6 +160,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                     pageX: orientation === 'left' ? event.pageX - $ul[0].offsetWidth + 1 : event.pageX + $ul[0].offsetWidth - 1,
                     pageY: $ul[0].offsetTop + $li[0].offsetTop - 3,
                     view: event.view || window,
+                    target: event.target,
                     event: $event
                 };
 
