@@ -169,6 +169,10 @@ angular.module('ui.bootstrap.contextMenu', [])
                  * Regardless, passing them to `when` makes the implementation singular.
                  */
                 $q.when(nestedMenu).then(function(promisedNestedMenu) {
+                    if (angular.isFunction(promisedNestedMenu)) {
+                        //  support for dynamic subitems
+                        promisedNestedMenu = promisedNestedMenu.call($scope, $scope, event, modelValue, text, $li);
+                    }
                     var nestedParam = {
                       "$scope" : $scope,
                       "event" : ev,
