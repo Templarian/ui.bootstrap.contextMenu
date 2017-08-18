@@ -347,7 +347,7 @@ angular.module('ui.bootstrap.contextMenu', [])
 
             var leftCoordinate = event.pageX;
             var menuWidth = angular.element($ul[0]).prop('offsetWidth');
-            var winWidth = event.view.innerWidth;
+            var winWidth = event.view.innerWidth + window.pageXOffset;
             var padding = 5;
 
             if (leftOriented) {
