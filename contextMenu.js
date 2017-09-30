@@ -181,6 +181,12 @@ angular.module('ui.bootstrap.contextMenu', [])
                 });
             };
 
+            $ul.on('mouseleave', function ($event) {
+                if (level > 0) {
+                    removeContextMenus(level);
+                }
+            });
+
             $li.on('click', function ($event) {
                 if($event.which == 1) {
                   $event.preventDefault();
