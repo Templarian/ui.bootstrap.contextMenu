@@ -1,12 +1,13 @@
 {
     "name": "angular-bootstrap-contextmenu",
-    "version": "0.9.9",
-    "main": [ 
+    "version": "1.0.0",
+    "main": [
         "contextMenu.js"
     ],
     "homepage": "https://github.com/Templarian/ui.bootstrap.contextMenu",
     "authors": [
         { "name": "Austin Andrews", "homepage": "http://templarian.com" }
+        { "name": "Jose Taira", "homepage": "https://github.com/josetaira" }
     ],
     "license": ["MIT"],
     "ignore": [
