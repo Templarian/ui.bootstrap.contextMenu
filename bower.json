@@ -6,7 +6,7 @@
     ],
     "homepage": "https://github.com/Templarian/ui.bootstrap.contextMenu",
     "authors": [
-        { "name": "Austin Andrews", "homepage": "http://templarian.com" }
+        { "name": "Austin Andrews", "homepage": "http://templarian.com" },
         { "name": "Jose Taira", "homepage": "https://github.com/josetaira" }
     ],
     "license": ["MIT"],
