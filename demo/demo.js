@@ -2,8 +2,8 @@
 angular.module('app', ['ui.bootstrap.contextMenu'])
 
 .controller('DemoController', [
-    '$scope',
-    function ($scope) {
+    '$scope', 'ContextMenuEvents',
+    function ($scope, ContextMenuEvents) {
 
         $scope.player = {
             gold: 100
@@ -116,5 +116,21 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
             }]
         ];
 
+        $scope.$on(ContextMenuEvents.ContextMenuOpening, function(event, data) {
+          console.info(event);
+          console.info(data);
+        });
+        $scope.$on(ContextMenuEvents.ContextMenuOpened, function(event, data) {
+          console.info(event);
+          console.info(data);
+        });
+        $scope.$on(ContextMenuEvents.ContextMenuClosed, function(event, data) {
+          console.info(event);
+          console.info(data);
+        });
+        $scope.$on(ContextMenuEvents.ContextMenuAllClosed, function(event, data) {
+          console.info(event);
+          console.info(data);
+        });
     }
 ]);

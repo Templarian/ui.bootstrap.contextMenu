@@ -125,6 +125,22 @@ $scope.menuOptions = function (item) {
 };
 ```
 
+## Events
+There are some events you can listen to whenever the context menu is opening or closing
+- `context-menu-opening` - triggers right before the context menu is initially opened
+- `context-menu-opened` - triggers whenever any context menu is completely opened
+- `context-menu-closed` - triggers whenever any context menu is closed
+- `context-menu-all-closed` - triggers when all context menus are closed
+
+### Sample usage
+```js
+$scope.$on('<event_name_here>', function (event, args) {
+  args.context; // The element this directive is attached to
+  args.params; // Available only for context-menu-opened the params passed for the context menu
+  args.contextMenu; // Available only for context-menu-opened and context-menu-closed. The $ul element of this context menu.
+})
+```
+
 ## Custom Class
 
 Add your custom class to top element of the context menu

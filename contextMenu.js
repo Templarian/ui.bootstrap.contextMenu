@@ -12,7 +12,19 @@ angular.module('ui.bootstrap.contextMenu', [])
     };
 
 })
-.directive('contextMenu', ["$parse", "$q", "CustomService", "$sce", function ($parse, $q, custom, $sce) {
+.constant('ContextMenuEvents', {
+  // Triggers when all the context menus have been closed
+  ContextMenuAllClosed: 'context-menu-all-closed',
+  // Triggers when any single conext menu is called.
+  // Closing all context menus triggers this for each level open
+  ContextMenuClosed: 'context-menu-closed',
+  // Triggers right before the very first context menu is opened
+  ContextMenuOpening: 'context-menu-opening',
+  // Triggers right after any context menu is opened
+  ContextMenuOpened: 'context-menu-opened'
+})
+.directive('contextMenu', ['$rootScope', 'ContextMenuEvents', "$parse", "$q", "CustomService", "$sce",
+function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
 
     var _contextMenus = [];
     // Contains the element that was clicked to show the context menu
@@ -334,6 +346,12 @@ angular.module('ui.bootstrap.contextMenu', [])
         $(document).find('body').append($ul);
 
         doAfterAllPromises(params);
+
+        $rootScope.$broadcast(ContextMenuEvents.ContextMenuOpened, {
+          context: _clickedElement,
+          contextMenu: $ul,
+          params: params
+        });
     };
 
     /**
@@ -468,7 +486,12 @@ angular.module('ui.bootstrap.contextMenu', [])
      */
     function removeContextMenus (level) {
         while (_contextMenus.length && (!level || _contextMenus.length > level)) {
-            _contextMenus.pop().remove();
+            var cm = _contextMenus.pop();
+            $rootScope.$broadcast(ContextMenuEvents.ContextMenuClosed, { context: _clickedElement, contextMenu: cm });
+            cm.remove();
+        }
+        if(!level) {
+          $rootScope.$broadcast(ContextMenuEvents.ContextMenuAllClosed, { context: _clickedElement });
         }
     }
 
@@ -499,6 +522,7 @@ angular.module('ui.bootstrap.contextMenu', [])
         $(document).off('scroll', removeOnScrollEvent);
         $(_clickedElement).removeClass('context');
         removeContextMenus();
+        $rootScope.$broadcast('')
     }
 
     return function ($scope, element, attrs) {
@@ -545,6 +569,7 @@ angular.module('ui.bootstrap.contextMenu', [])
                     "customClass" : customClass,
                     "orientation": orientation
                   };
+                  $rootScope.$broadcast(ContextMenuEvents.ContextMenuOpening, { context: _clickedElement });
                   renderContextMenu(params);
                 });
             });
