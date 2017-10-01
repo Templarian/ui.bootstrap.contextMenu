@@ -9,6 +9,8 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
             gold: 100
         };
 
+        $scope.showHiddenOption = false;
+
         $scope.items = [
             { name: 'Small Health Potion', cost: 4},
             { name: 'Small Mana Potion', cost: 5 },
@@ -64,6 +66,12 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
               text: 'Disabled object-based option',
               enabled: function () {
                 return false;
+              }
+            },
+            {
+              text: 'Hidden option',
+              displayed: function () {
+                return $scope.showHiddenOption;
               }
             }
         ];

@@ -23,6 +23,13 @@
         </a>
     </div>
     <button class="btn btn-default"
+            ng-click="showHiddenOption = !showHiddenOption">
+            Toggle Hidden Option ({{showHiddenOption}})
+    </button>
+
+    <br/>
+    <br/>
+    <button class="btn btn-default"
             context-menu="otherMenuOptions"
             model="'Red'">Right Click</button>
 

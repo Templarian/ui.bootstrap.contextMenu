@@ -80,6 +80,7 @@ Every menu option is represented by an Object containing the following propertie
 - text - [Function/String] A function that returns the string or the actual string itself
 - click - [Function] The function to be called on click of the option
 - enabled - [Function/Boolean] A function returning whether the option is enabled or not, or a boolean
+- displayed - [Function/Boolean] A function returning whether the option is displayed or not, or a boolean. If not displayed, no element is created at all and nothing related to the item will be executed (events, functions returning children, etc.)
 - children - [Array/Promise] An Array of menu options that will appear as the submenu of the current option, or a Promise resolving to a Function which can provide menu options dynamically
 
 ### Legacy implementation (still supported, but will not be updated any longer)

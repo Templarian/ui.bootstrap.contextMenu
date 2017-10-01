@@ -315,7 +315,18 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var itemParams = angular.extend({}, params);
                 itemParams.item = item;
                 itemParams.$li = $li;
-                processItem(itemParams);
+
+                // If displayed is anything other than a function or a boolean
+                var displayed = true;
+                if (angular.isFunction(item.displayed)) {
+                  // if displayed is a function
+                  displayed = item.displayed();
+                } else if (item.displayed === true || item.displayed === false) {
+                  // If displayed is a boolean
+                  displayed = item.displayed;
+                }
+
+                if (displayed) { processItem(itemParams); }
             }
             $ul.append($li);
         });
