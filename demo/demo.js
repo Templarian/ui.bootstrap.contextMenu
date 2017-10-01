@@ -43,6 +43,14 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
               }
             },
             {
+              text: 'Clicking this does not close the context menu',
+              click: function () {
+                // Returning false or any false-y value EXCEPT undefined will stop
+                // the context menu from closing.
+                return false;
+              }
+            },
+            {
               text: 'Object-based with Submenu',
               click: function() {
                 alert('I clicked the parent item');

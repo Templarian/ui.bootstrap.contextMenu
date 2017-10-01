@@ -196,9 +196,11 @@ angular.module('ui.bootstrap.contextMenu', [])
                 if($event.which == 1) {
                   $event.preventDefault();
                   $scope.$apply(function () {
-                    $(event.currentTarget).removeClass('context');
-                    removeAllContextMenus();
 
+                    var cleanupFunction = function () {
+                      $(event.currentTarget).removeClass('context');
+                      removeAllContextMenus();
+                    };
                     var clickFunction = angular.isFunction(item.click)
                       ? item.click
                       : (angular.isFunction(item[1])
@@ -206,7 +208,12 @@ angular.module('ui.bootstrap.contextMenu', [])
                           : null);
 
                     if (clickFunction) {
-                      clickFunction.call($scope, $scope, event, modelValue, text, $li);
+                      var res = clickFunction.call($scope, $scope, event, modelValue, text, $li);
+                      if(res === undefined || res) {
+                        cleanupFunction();
+                      }
+                    } else {
+                      cleanupFunction();
                     }
                   });
                 }
