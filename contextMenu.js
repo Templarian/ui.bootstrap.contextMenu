@@ -54,6 +54,7 @@ angular.module('ui.bootstrap.contextMenu', [])
             }
 
           $a.css($anchorStyle);
+          $a.addClass('dropdown-item');
           $a.attr({ tabindex: '-1', href: '#' });
 
           var textParam = item[0];
