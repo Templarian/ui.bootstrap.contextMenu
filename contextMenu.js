@@ -531,22 +531,22 @@ angular.module('ui.bootstrap.contextMenu', [])
                 var modelValue = $scope.$eval(attrs.model);
                 var orientation = attrs.contextMenuOrientation;
 
-                var params = {
-                  "$scope" : $scope,
-                  "event" : event,
-                  "options" : options,
-                  "modelValue" : modelValue,
-                  "level" : 0,
-                  "customClass" : customClass,
-                  "orientation": orientation
-                };
-
-                if (options instanceof Array) {
-                    if (options.length === 0) { return; }
-                    renderContextMenu(params);
-                } else {
-                    throw '"' + attrs.contextMenu + '" not an array';
-                }
+                $q.when(options).then(function(promisedMenu) {
+                  if (angular.isFunction(promisedMenu)) {
+                      //  support for dynamic items
+                      promisedMenu = promisedMenu.call($scope, $scope, event, modelValue);
+                  }
+                  var params = {
+                    "$scope" : $scope,
+                    "event" : event,
+                    "options" : promisedMenu,
+                    "modelValue" : modelValue,
+                    "level" : 0,
+                    "customClass" : customClass,
+                    "orientation": orientation
+                  };
+                  renderContextMenu(params);
+                });
             });
 
             // Remove all context menus if the scope is destroyed

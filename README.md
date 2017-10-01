@@ -75,6 +75,11 @@ $scope.menuOptions = [
 
 ## Menu Options
 
+The menu options passed onto context-menu can be one of:
+- An Array containing Objects to represent each item in the context menu
+- A Function returning an Array of Objects (as above)
+- A Promise returning an Array of Objects or a Function (as above)
+
 ### New implementation
 Every menu option is represented by an Object containing the following properties:
 - text - [Function/String] A function that returns the string or the actual string itself
