@@ -69,15 +69,13 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
           $a.addClass('dropdown-item');
           $a.attr({ tabindex: '-1', href: '#' });
 
-          var textParam = item[0];
+          var textParam = item[0] || item.text;
           var text = DEFAULT_ITEM_TEXT;
 
           if (typeof textParam === 'string') {
               text = textParam;
           } else if (typeof textParam === "function") {
               text = textParam.call($scope, $scope, event, modelValue);
-          } else if (typeof item.text !== "undefined") {
-              text = item.text;
           }
 
           var $promise = $q.when(text);

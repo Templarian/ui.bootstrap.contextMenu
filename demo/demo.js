@@ -69,6 +69,12 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
               }
             },
             {
+              text: function() { return 'Text Using Function'; }
+            },
+            {
+              html: function() { return '<a><b>HTML Using Function</b></a>'; }
+            },
+            {
               text: 'Hidden option',
               displayed: function () {
                 return $scope.showHiddenOption;
