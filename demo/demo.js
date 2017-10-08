@@ -66,13 +66,14 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
               text: 'Disabled object-based option',
               enabled: function () {
                 return false;
-              }
+              },
             },
             {
               text: function() { return 'Text Using Function'; },
               hasBottomDivider: function () {
                 return $scope.showHiddenOption;
-              }
+              },
+              children: [],
             },
             {
               html: function() { return '<a><b>HTML Using Function</b></a>'; },

@@ -108,6 +108,8 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
         }
 
         $li.append(optionText);
+
+        return optionText;
     };
 
     /**
@@ -133,7 +135,7 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
         var text = DEFAULT_ITEM_TEXT;
         var currItemParam = angular.extend({}, params);
         var item = params.item;
-        
+
         currItemParam.nestedMenu = nestedMenu;
         currItemParam.enabled = resolveBoolOrFunc(item.enabled || item[2], params);
         currItemParam.text = createAndAddOptionText(currItemParam);
@@ -241,10 +243,7 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
                 });
             });
         } else {
-            $li.on('click', function ($event) {
-                $event.preventDefault();
-            });
-            $li.addClass('disabled');
+            setElementDisabled($li);
         }
     };
 
@@ -347,6 +346,13 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
             }
           }
         });
+
+        if ($ul.children().length === 0) {
+          var $emptyLi = angular.element('<li>');
+          setElementDisabled($emptyLi);
+          $emptyLi.html('<a>empty</a>');
+          $ul.append($emptyLi);
+        }
 
         $(document).find('body').append($ul);
 
@@ -544,6 +550,13 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
       var $li = angular.element('<li>');
       $li.addClass('divider');
       $ul.append($li);
+    }
+
+    function setElementDisabled($li) {
+      $li.on('click', function ($event) {
+          $event.preventDefault();
+      });
+      $li.addClass('disabled');
     }
 
     return function ($scope, element, attrs) {
