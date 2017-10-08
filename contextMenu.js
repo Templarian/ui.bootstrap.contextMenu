@@ -316,29 +316,34 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
         params.$promises = $promises;
 
         angular.forEach(options, function (item) {
-            var $li = $('<li>');
-            if (item === null) {
-                $li.addClass('divider');
-            } else if (typeof item[0] === "object") {
-                custom.initialize($li, item);
-            } else {
-                var itemParams = angular.extend({}, params);
-                itemParams.item = item;
-                itemParams.$li = $li;
 
-                // If displayed is anything other than a function or a boolean
-                var displayed = true;
-                if (angular.isFunction(item.displayed)) {
-                  // if displayed is a function
-                  displayed = item.displayed();
-                } else if (item.displayed === true || item.displayed === false) {
-                  // If displayed is a boolean
-                  displayed = item.displayed;
-                }
-
-                if (displayed) { processItem(itemParams); }
+            // If displayed is anything other than a function or a boolean
+            var displayed = true;
+            if (item) {
+              if (angular.isFunction(item.displayed)) {
+                // if displayed is a function
+                displayed = item.displayed();
+              } else if (isBoolean(item.displayed)) {
+                // If displayed is a boolean
+                displayed = item.displayed;
+              }
             }
-            $ul.append($li);
+
+            // Only add the <li> if the item is displayed
+            if (displayed) {
+              var $li = $('<li>');
+              if (item === null) {
+                  $li.addClass('divider');
+              } else if (typeof item[0] === "object") {
+                  custom.initialize($li, item);
+              } else {
+                  var itemParams = angular.extend({}, params);
+                  itemParams.item = item;
+                  itemParams.$li = $li;
+                  if (displayed) { processItem(itemParams); }
+              }
+              $ul.append($li);
+            }
         });
 
         $(document).find('body').append($ul);
@@ -464,10 +469,13 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
         var modelValue = params.modelValue;
         var text = params.text;
 
-        if (typeof item.enabled !== "undefined") {
-            return item.enabled.call($scope, $scope, event, modelValue, text);
-        } else if (typeof item[2] === "function") {
-            return item[2].call($scope, $scope, event, modelValue, text);
+        // Prefer the new implementation over legacy
+        var enabled = item.enabled || item[2];
+
+        if (angular.isFunction(enabled)) {
+            return enabled.call($scope, $scope, event, modelValue, text);
+        } else if(isBoolean(enabled)) {
+            return enabled;
         } else {
             return true;
         }
@@ -521,6 +529,10 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
         $(_clickedElement).removeClass('context');
         removeContextMenus();
         $rootScope.$broadcast('')
+    }
+
+    function isBoolean(a) {
+      return a === false || a === true;
     }
 
     return function ($scope, element, attrs) {
