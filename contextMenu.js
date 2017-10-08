@@ -132,8 +132,10 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
 
         var text = DEFAULT_ITEM_TEXT;
         var currItemParam = angular.extend({}, params);
+        var item = params.item;
+        
         currItemParam.nestedMenu = nestedMenu;
-        currItemParam.enabled = isOptionEnabled(currItemParam);
+        currItemParam.enabled = resolveBoolOrFunc(item.enabled || item[2], params);
         currItemParam.text = createAndAddOptionText(currItemParam);
 
         registerCurrentItemEvents(currItemParam);
@@ -317,33 +319,33 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
 
         angular.forEach(options, function (item) {
 
+          if (item === null) {
+            appendDivider($ul);
+          } else {
             // If displayed is anything other than a function or a boolean
-            var displayed = true;
-            if (item) {
-              if (angular.isFunction(item.displayed)) {
-                // if displayed is a function
-                displayed = item.displayed();
-              } else if (isBoolean(item.displayed)) {
-                // If displayed is a boolean
-                displayed = item.displayed;
-              }
-            }
+            var displayed = resolveBoolOrFunc(item.displayed, params);
 
             // Only add the <li> if the item is displayed
             if (displayed) {
               var $li = $('<li>');
-              if (item === null) {
-                  $li.addClass('divider');
-              } else if (typeof item[0] === "object") {
+              var itemParams = angular.extend({}, params);
+              itemParams.item = item;
+              itemParams.$li = $li;
+
+              if (typeof item[0] === "object") {
                   custom.initialize($li, item);
               } else {
-                  var itemParams = angular.extend({}, params);
-                  itemParams.item = item;
-                  itemParams.$li = $li;
-                  if (displayed) { processItem(itemParams); }
+                  processItem(itemParams);
+              }
+              if (resolveBoolOrFunc(item.hasTopDivider, itemParams, false)) {
+                appendDivider($ul);
               }
               $ul.append($li);
+              if (resolveBoolOrFunc(item.hasBottomDivider, itemParams, false)) {
+                appendDivider($ul);
+              }
             }
+          }
         });
 
         $(document).find('body').append($ul);
@@ -460,27 +462,6 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
       return $ul;
     }
 
-    // if item is object, and has enabled prop invoke the prop
-    // else if fallback to item[2]
-    function isOptionEnabled (params) {
-        var item = params.item;
-        var $scope = params.$scope;
-        var event = params.event;
-        var modelValue = params.modelValue;
-        var text = params.text;
-
-        // Prefer the new implementation over legacy
-        var enabled = item.enabled || item[2];
-
-        if (angular.isFunction(enabled)) {
-            return enabled.call($scope, $scope, event, modelValue, text);
-        } else if(isBoolean(enabled)) {
-            return enabled;
-        } else {
-            return true;
-        }
-    };
-
     function isTouchDevice() {
       return 'ontouchstart' in window  || navigator.maxTouchPoints; // works on most browsers | works on IE10/11 and Surface
     }
@@ -533,6 +514,36 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
 
     function isBoolean(a) {
       return a === false || a === true;
+    }
+
+    /** Resolves a boolean or a function that returns a boolean
+     * Returns true by default if the param is null or undefined
+     * @param a - the parameter to be checked
+     * @param params - the object for the item's parameters
+     * @param defaultValue - the default boolean value to use if the parameter is
+     *  neither a boolean nor function. True by default.
+     */
+    function resolveBoolOrFunc(a, params, defaultValue) {
+      var item = params.item;
+      var $scope = params.$scope;
+      var event = params.event;
+      var modelValue = params.modelValue;
+
+      defaultValue = isBoolean(defaultValue) ? defaultValue : true;
+
+      if (isBoolean(a)) {
+        return a;
+      } else if (angular.isFunction(a)) {
+        return a.call($scope, $scope, event, modelValue);
+      } else {
+        return defaultValue;
+      }
+    }
+
+    function appendDivider($ul) {
+      var $li = angular.element('<li>');
+      $li.addClass('divider');
+      $ul.append($li);
     }
 
     return function ($scope, element, attrs) {

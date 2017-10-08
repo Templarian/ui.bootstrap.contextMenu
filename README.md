@@ -82,11 +82,15 @@ The menu options passed onto context-menu can be one of:
 
 ### New implementation
 Every menu option is represented by an Object containing the following properties:
-- text - [Function/String] A function that returns the string or the actual string itself
-- click - [Function] The function to be called on click of the option
-- enabled - [Function/Boolean] A function returning whether the option is enabled or not, or a boolean
-- displayed - [Function/Boolean] A function returning whether the option is displayed or not, or a boolean. If not displayed, no element is created at all and nothing related to the item will be executed (events, functions returning children, etc.)
-- children - [Array/Promise] An Array of menu options that will appear as the submenu of the current option, or a Promise resolving to a Function which can provide menu options dynamically
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| text | Function/String | A function that returns the string or the actual string itself |
+| click | Function | The function to be called on click of the option|
+| enabled | Function/Boolean | A function returning whether the option is enabled or not, or a boolean |
+| displayed | Function/Boolean | A function returning whether the option is displayed or not, or a boolean. If not displayed, no element is created at all and nothing related to the item will be executed (events, functions returning children, etc.) |
+| children | Array/Function/Promise | [Array] - the actual Array of Objects for the level; [Function] - returns an Array of Objects, or a Function that returns the Array or a Promise as specified below; [Promise] - resolves with an Array or a Function that returns the Array as specified above |
+| hasTopDivider | Function/Boolean | A function/boolean returning whether to append a divider before the current item. Defaults to false |
+| hasBottomDivider | Function/Boolean | A function/boolean returning whether to append a divider after the current item. Defaults to false |
 
 ### Legacy implementation (still supported, but will not be updated any longer)
 Every menu option has an array with 2-3 indexs. Most items will use the `[String, Function]` format. If you need a dynamic item in your context menu you can also use the `[Function, Function]` format.
@@ -230,23 +234,3 @@ Sometimes you'll want to catch the same event that's being used by this library 
         model="'Blue'">Right Click allow event propagation</button>
 ```
 Note that if you set this to true, and don't catch it with something else the browser's context menu will be shown on top of this library's context menu.
-
-## Nested Menus (v0.9.5+)
-
-Nested lists work by appending an array as the last index of any list of menu items.
-
-```js
-$scope.menuOptions = [
-    ['Parent Item 1', function ($itemScope) {
-        // Code
-    },  [
-            ['Child Item 1', function ($itemScope) {
-                // Code
-            }],
-            ['Child Item 2', function ($itemScope) {
-                // Code
-            }]
-        ]
-    ]
-];
-```

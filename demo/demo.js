@@ -69,10 +69,16 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
               }
             },
             {
-              text: function() { return 'Text Using Function'; }
+              text: function() { return 'Text Using Function'; },
+              hasBottomDivider: function () {
+                return $scope.showHiddenOption;
+              }
             },
             {
-              html: function() { return '<a><b>HTML Using Function</b></a>'; }
+              html: function() { return '<a><b>HTML Using Function</b></a>'; },
+              hasTopDivider: function () {
+                return !$scope.showHiddenOption;
+              }
             },
             {
               text: 'Hidden option',
