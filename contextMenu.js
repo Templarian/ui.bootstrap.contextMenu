@@ -69,7 +69,7 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
           $a.addClass('dropdown-item');
           $a.attr({ tabindex: '-1', href: '#' });
 
-          var textParam = item[0] || item.text;
+          var textParam = item.text || item[0];
           var text = DEFAULT_ITEM_TEXT;
 
           if (typeof textParam === 'string') {
@@ -135,9 +135,10 @@ function ($rootScope, ContextMenuEvents, $parse, $q, custom, $sce) {
         var text = DEFAULT_ITEM_TEXT;
         var currItemParam = angular.extend({}, params);
         var item = params.item;
+        var enabled = item.enabled === undefined ? item[2] : item.enabled;
 
         currItemParam.nestedMenu = nestedMenu;
-        currItemParam.enabled = resolveBoolOrFunc(item.enabled || item[2], params);
+        currItemParam.enabled = resolveBoolOrFunc(enabled, params);
         currItemParam.text = createAndAddOptionText(currItemParam);
 
         registerCurrentItemEvents(currItemParam);
