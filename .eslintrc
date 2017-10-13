@@ -1,0 +1,30 @@
+{
+    "env": {
+        "browser": true
+    },
+    "extends": "plugin:angular/johnpapa",
+    "rules": {
+        "indent": [
+            "error",
+            2
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "angular/file-name": [
+            0
+        ],
+        "angular/controller-as": [
+            0
+        ],
+    }
+}
