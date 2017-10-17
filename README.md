@@ -89,6 +89,7 @@ The menu options passed onto context-menu can be one of:
 
 ### New implementation
 Every menu option is represented by an Object containing the following properties:
+
 | Property | Type | Description |
 | -------- | ---- | ----------- |
 | text | Function/String | A function that returns the string or the actual string itself. Either text or html must be specified |
