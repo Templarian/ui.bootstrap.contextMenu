@@ -63,6 +63,22 @@ angular.module('app', ['ui.bootstrap.contextMenu'])
           ]
         },
         {
+          text: 'Object-based with Submenu 3 levels',
+          click: function() {
+            alert('I clicked the parent item');
+          },
+          children: [
+            {
+              text: 'Object-based child 1',
+              click: function() { alert('object child 1');},
+              children: [
+                { text: '3rd Level', click: function() { alert('level3!'); }}
+              ]
+            },
+            { text: 'Object-based child 2', click: function() { alert('object child 2');} }
+          ]
+        },
+        {
           text: 'Disabled object-based option',
           enabled: function () {
             return false;
