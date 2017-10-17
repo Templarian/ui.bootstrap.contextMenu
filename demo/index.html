@@ -17,7 +17,8 @@
         <a href="#"
            class="list-group-item"
            ng-repeat="item in items"
-           context-menu="menuOptions">
+           context-menu="menuOptions"
+           context-menu-empty-text="'SOME TEXT FOR EMPTY'">
             <span class="badge">{{item.cost}}</span>
             {{item.name}}
         </a>

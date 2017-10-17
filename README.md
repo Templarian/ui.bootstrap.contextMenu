@@ -13,6 +13,12 @@ AngularJS UI Bootstrap Module for adding context menus to elements. [Demo](http:
 
 Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contextMenu` as a dependency module.
 
+## Context Menu Settings
+- `context-menu-empty-text` - (Default: 'empty') An angular expression containing the string to be used when the context menu is empty
+- `context-menu-class` - A string literal containing a custom class to be added to the context menu (The <ul> elements)
+- `allow-event-propagation` - (Default: false) A boolean determining whether to allow event propagation. Note that if you set this to true, and don’t catch it with something else the browser’s context menu will be shown on top of this library’s context menu.
+- `model` - (See Model Attribute below)
+
 ### View
 
 ```html
@@ -33,11 +39,11 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 ### Callback Parameters
 
 There are currently 5 parameters that are being passed to the callback:
-- $itemScope - The scope of the directive
-- event - The event associated with this directive (normally `contextmenu`)
-- modelValue - See "Model Attribute" below
-- text - The HTML value of the text. Normally this contains the &lt;a&gt; tag surrounding the text by default.
-- $li - The list item selected
+- `$itemScope` - The scope of the directive
+- `event` - The event associated with this directive (normally `contextmenu`)
+- `modelValue` - See "Model Attribute" below
+- `text` - The HTML value of the text. Normally this contains the &lt;a&gt; tag surrounding the text by default.
+- `$li` - The list item selected
 
 ### Controller
 
@@ -84,7 +90,8 @@ The menu options passed onto context-menu can be one of:
 Every menu option is represented by an Object containing the following properties:
 | Property | Type | Description |
 | -------- | ---- | ----------- |
-| text | Function/String | A function that returns the string or the actual string itself |
+| text | Function/String | A function that returns the string or the actual string itself. Either text or html must be specified |
+| html | Function/String | A function or string that returns the html to be used for this menu option. Either text or html must be specified |
 | click | Function | The function to be called on click of the option|
 | enabled | Function/Boolean | A function returning whether the option is enabled or not, or a boolean |
 | displayed | Function/Boolean | A function returning whether the option is displayed or not, or a boolean. If not displayed, no element is created at all and nothing related to the item will be executed (events, functions returning children, etc.) |
@@ -145,14 +152,6 @@ $scope.$on('<event_name_here>', function (event, args) {
 })
 ```
 
-## Custom Class
-
-Add your custom class to top element of the context menu
-
-```html
-<div context-menu="menuOptions" context-menu-class="custom_class"></div>
-```
-
 ## Model Attribute (optional)
 
 In instances where a reference is not passed through the `$itemScope` (i.e. not using `ngRepeat`), there is a `model` attribute that can pass a value.
@@ -187,50 +186,3 @@ body > .angular-bootstrap-contextmenu.dropdown {
     background-color: rgba(0, 0, 0, 0.1);
 }
 ```
-
-
-## Custom HTML
-
-```js
-// With a custom static string:
-var customHtml = '<div style="cursor: pointer; background-color: pink">' +
-                 '<i class="glyphicon glyphicon-ok-sign"></i> Testing Custom </div>';
-
-var customItem = {
-    html: customHtml,
-    enabled: function() {return true},
-    click: function ($itemScope, $event, value) {
-        alert("custom html");
-    }};
-
-// With a custom function returning a string:
-var customItem2 = {
-    html: function($itemScope) {
-        return $itemScope.lastname + ' ' + $itemScope.firstname;
-    },
-    enabled: function() {return true},
-    click: function ($itemScope, $event, value) {
-        alert("custom html");
-    }
-};
-
-$scope.customHTMLOptions = [
-    customItem,
-    customItem2,
-    ['Example 1', function ($itemScope, $event, value) {
-        alert("Example 1");
-    }]
-];
-```
-
-## Allow Event Propagation
-
-Sometimes you'll want to catch the same event that's being used by this library and use it in another. To do this, you can use the property `allow-event-propagation`
-
-```html
-<button class="btn btn-default"
-        context-menu="otherMenuOptions"
-        allow-event-propagation="true"
-        model="'Blue'">Right Click allow event propagation</button>
-```
-Note that if you set this to true, and don't catch it with something else the browser's context menu will be shown on top of this library's context menu.

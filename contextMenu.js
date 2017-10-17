@@ -30,6 +30,7 @@
         // Contains the element that was clicked to show the context menu
         var _clickedElement = null;
         var DEFAULT_ITEM_TEXT = '"New Item';
+        var _emptyText = 'empty';
 
         function createAndAddOptionText(params) {
           // Destructuring:
@@ -352,7 +353,7 @@
           if ($ul.children().length === 0) {
             var $emptyLi = angular.element('<li>');
             setElementDisabled($emptyLi);
-            $emptyLi.html('<a>empty</a>');
+            $emptyLi.html('<a>' + _emptyText + '</a>');
             $ul.append($emptyLi);
           }
 
@@ -563,6 +564,8 @@
 
         return function ($scope, element, attrs) {
           var openMenuEvent = 'contextmenu';
+          _emptyText = $scope.$eval(attrs.contextMenuEmptyText) || 'empty';
+
           if(attrs.contextMenuOn && typeof(attrs.contextMenuOn) === 'string'){
             openMenuEvent = attrs.contextMenuOn;
           }
