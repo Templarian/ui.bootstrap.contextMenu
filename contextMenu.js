@@ -559,59 +559,62 @@
         }
 
         return function ($scope, element, attrs) {
-          var openMenuEvent = 'contextmenu';
+          var openMenuEvents = ['contextmenu'];
           _emptyText = $scope.$eval(attrs.contextMenuEmptyText) || 'empty';
 
           if(attrs.contextMenuOn && typeof(attrs.contextMenuOn) === 'string'){
-            openMenuEvent = attrs.contextMenuOn;
+            openMenuEvents = attrs.contextMenuOn.split(',');
           }
-          element.on(openMenuEvent, function (event) {
-            if(!attrs.allowEventPropagation) {
-              event.stopPropagation();
-              event.preventDefault();
-            }
 
-            // Don't show context menu if on touch device and element is draggable
-            if(isTouchDevice() && element.attr('draggable') === 'true') {
-              return false;
-            }
+          angular.forEach(openMenuEvents, function (openMenuEvent) {
+            element.on(openMenuEvent.trim(), function (event) {
+              if(!attrs.allowEventPropagation) {
+                event.stopPropagation();
+                event.preventDefault();
+              }
 
-            // Remove if the user clicks outside
-            $document.find('body').on('mousedown', removeOnOutsideClickEvent);
-            // Remove the menu when the scroll moves
-            $document.on('scroll', removeOnScrollEvent);
+              // Don't show context menu if on touch device and element is draggable
+              if(isTouchDevice() && element.attr('draggable') === 'true') {
+                return false;
+              }
 
-            _clickedElement = event.currentTarget;
-            $(_clickedElement).addClass('context');
+              // Remove if the user clicks outside
+              $document.find('body').on('mousedown', removeOnOutsideClickEvent);
+              // Remove the menu when the scroll moves
+              $document.on('scroll', removeOnScrollEvent);
 
-            $scope.$apply(function () {
-              var options = $scope.$eval(attrs.contextMenu);
-              var customClass = attrs.contextMenuClass;
-              var modelValue = $scope.$eval(attrs.model);
-              var orientation = attrs.contextMenuOrientation;
+              _clickedElement = event.currentTarget;
+              $(_clickedElement).addClass('context');
 
-              $q.when(options).then(function(promisedMenu) {
-                if (angular.isFunction(promisedMenu)) {
-                  //  support for dynamic items
-                  promisedMenu = promisedMenu.call($scope, $scope, event, modelValue);
-                }
-                var params = {
-                  '$scope' : $scope,
-                  'event' : event,
-                  'options' : promisedMenu,
-                  'modelValue' : modelValue,
-                  'level' : 0,
-                  'customClass' : customClass,
-                  'orientation': orientation
-                };
-                $rootScope.$broadcast(ContextMenuEvents.ContextMenuOpening, { context: _clickedElement });
-                renderContextMenu(params);
+              $scope.$apply(function () {
+                var options = $scope.$eval(attrs.contextMenu);
+                var customClass = attrs.contextMenuClass;
+                var modelValue = $scope.$eval(attrs.model);
+                var orientation = attrs.contextMenuOrientation;
+
+                $q.when(options).then(function(promisedMenu) {
+                  if (angular.isFunction(promisedMenu)) {
+                    //  support for dynamic items
+                    promisedMenu = promisedMenu.call($scope, $scope, event, modelValue);
+                  }
+                  var params = {
+                    '$scope' : $scope,
+                    'event' : event,
+                    'options' : promisedMenu,
+                    'modelValue' : modelValue,
+                    'level' : 0,
+                    'customClass' : customClass,
+                    'orientation': orientation
+                  };
+                  $rootScope.$broadcast(ContextMenuEvents.ContextMenuOpening, { context: _clickedElement });
+                  renderContextMenu(params);
+                });
               });
-            });
 
-            // Remove all context menus if the scope is destroyed
-            $scope.$on('$destroy', function () {
-              removeAllContextMenus();
+              // Remove all context menus if the scope is destroyed
+              $scope.$on('$destroy', function () {
+                removeAllContextMenus();
+              });
             });
           });
         };
