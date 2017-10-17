@@ -163,6 +163,7 @@
           var nestedMenu = params.nestedMenu;
           var enabled = params.enabled;
           var orientation = String(params.orientation).toLowerCase();
+          var customClass = params.customClass;
 
           if (enabled) {
             var openNestedMenu = function ($event) {
@@ -197,7 +198,8 @@
                   options : promisedNestedMenu,
                   modelValue : modelValue,
                   level : level + 1,
-                  orientation: orientation
+                  orientation: orientation,
+                  customClass: customClass
                 };
                 renderContextMenu(nestedParam);
               });
