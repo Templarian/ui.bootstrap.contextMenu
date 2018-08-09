@@ -617,6 +617,12 @@
               });
             });
           });
+
+          if (attrs.closeMenuOn) {
+            $scope.$on(attrs.closeMenuOn, function () {
+              removeAllContextMenus();
+            });
+          }
         };
       }]);
 // eslint-disable-next-line angular/window-service
