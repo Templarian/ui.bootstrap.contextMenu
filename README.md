@@ -19,6 +19,7 @@ Add a reference to `contextMenu.js`. In your app config add `ui.bootstrap.contex
 - `context-menu-class` - A string literal containing a custom class to be added to the context menu (The &lt;ul&gt; elements)
 - `allow-event-propagation` - (Default: false) A boolean determining whether to allow event propagation. Note that if you set this to true, and don’t catch it with something else the browser’s context menu will be shown on top of this library’s context menu.
 - `model` - (See Model Attribute below)
+- `close-menu-on` - (Default: '') A string literal containing event for triggering menu close action.
 
 ### View
 
