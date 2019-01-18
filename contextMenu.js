@@ -386,7 +386,8 @@
           $q.all($promises).then(function () {
             var topCoordinate  = event.pageY;
             var menuHeight = angular.element($ul[0]).prop('offsetHeight');
-            var winHeight = $window.scrollY + event.view.innerHeight;
+            var winHeight = $window.pageYOffset + event.view.innerHeight;
+
             /// the 20 pixels in second condition are considering the browser status bar that sometimes overrides the element
             if (topCoordinate > menuHeight && winHeight - topCoordinate < menuHeight + 20) {
               topCoordinate = event.pageY - menuHeight;
@@ -515,7 +516,7 @@
         }
 
         function removeAllContextMenus(e) {
-          $document.find('body').off('mousedown', removeOnOutsideClickEvent);
+          $document.find('body').off('mousedown touchstart', removeOnOutsideClickEvent);
           $document.off('scroll', removeOnScrollEvent);
           $(_clickedElement).removeClass('context');
           removeContextMenus();
@@ -573,6 +574,10 @@
 
           angular.forEach(openMenuEvents, function (openMenuEvent) {
             element.on(openMenuEvent.trim(), function (event) {
+              // Cleanup any leftover contextmenus(there are cases with longpress on touch where we
+              // still see multiple contextmenus)
+              removeAllContextMenus();
+
               if(!attrs.allowEventPropagation) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -584,7 +589,7 @@
               }
 
               // Remove if the user clicks outside
-              $document.find('body').on('mousedown', removeOnOutsideClickEvent);
+              $document.find('body').on('mousedown touchstart', removeOnOutsideClickEvent);
               // Remove the menu when the scroll moves
               $document.on('scroll', removeOnScrollEvent);
 
